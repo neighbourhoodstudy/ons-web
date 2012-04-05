@@ -1,0 +1,80 @@
+*
+{
+	margin:0;
+	padding:0;
+}
+
+body
+{
+	font-family: "Lucida Grande", "Lucida Sans Unicode", Lucida, tahoma,verdana, Helvetica, Arial, Sans-serif;
+	padding:20px;
+	background-color:#efefef;
+}
+
+h1
+{
+	margin-top:20px;
+	margin-bottom:20px;
+}
+
+p
+{
+	margin-bottom:10px;
+}
+
+#box
+{
+	background-color:#fff;
+	width:550px;
+	border:1px solid #ccc;
+	padding:20px;
+	margin:0 auto;
+}
+
+.module
+{
+	border:1px solid #ccc;
+	width: 400px;
+	margin-bottom:20px;
+}
+	.module .header, .module .header2
+	{
+		background-color:#efefef;
+		padding-left:10px;
+	}
+		.module .header h1, .module .header2 h1
+		{
+			margin:0;
+			display:inline;
+			font-size:16px;
+		}
+		
+	.module .content
+	{
+		clear:both;
+		padding:10px;
+	}
+	.module .placeholder
+	{
+		margin-top:1px;
+		margin-right:2px;
+	}
+	.module .expand
+	{
+		float:right;
+		display:inline;
+		background-image:url('../images/toggle-sprite.png');
+		background-position: 0px -16px;
+		width:16px;
+		height:16px;
+	}	
+	.module .collapse
+	{
+		float:right;
+		display:inline;
+		background-image:url('../images/toggle-sprite.png');
+		background-position: 0px 0px;
+		width:16px;
+		height:16px;
+	}
+	

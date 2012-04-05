@@ -1,0 +1,448 @@
+/*
+Name:     ONS
+Theme URI:      http://example.com/
+Description:    Child theme for the Suffusion
+Author:         John Sproull
+Author URI:     http: //example.com/about/
+Template:       suffusion
+Version:        0.1.0
+*/
+
+@import url("../suffusion/style.css");
+
+/* main page */
+body {
+	font-family: 'Cabin', Helvetica, sans-serif;
+	background: white;
+}
+
+.shadow {
+-webkit-box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, .5);
+-moz-box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, .5);
+box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, .5);
+}
+#container a { 
+	text-decoration: underline;
+	color: #404040 !important;
+}
+#container a:hover {
+	color: #707070 !important;
+}
+#container a:visited {
+	color: black;
+}
+label {
+	display: inline;
+}
+
+/* login */
+.loginout {
+	font-size: 1.2em;
+	float: right;
+	margin: 0px;
+	padding: 0px;
+	color: white;
+	top: -4px;
+	position: relative;
+	/*background-color: #99C6E7;
+	border: 1px solid #F6D7A5;*/
+}
+
+.loginout span {
+	margin: 0 .2em;
+}
+
+
+
+/* search */
+/* don't show the submit button */
+input[type="submit"].searchsubmit {
+	display: none;
+}
+
+/* main wrapper */
+#header {
+	height: 100px !important;
+	margin-bottom: 5px;
+}
+
+#header-container {
+}
+
+
+#header-container a {
+	text-decoration: none;
+	font-size: 14px;
+	color: black;
+}
+#header-container a:hover {
+	color: #707070;
+}
+
+#wrapper {
+	background: #C4DFF2 !important;
+	border-top: 1px solid #404040 !important; 
+	border-left: 1px solid #404040 !important; 
+	border-right: 1px solid #404040 !important; 
+	border-bottom: 0;
+	margin: 20px auto 0 auto !important;
+	-moz-border-radius-topleft: 8px !important;
+	-moz-border-radius-topright: 8px !important;
+	-moz-border-radius-bottomright: 0px !important;
+	-moz-border-radius-bottomleft: 0px !important;
+	-webkit-border-radius: 8px 8px 0px 0px !important;
+	border-radius: 8px 8px 0px 0px !important;
+}
+
+#cred a {
+	color: white !important;
+	text-decoration: none;
+}
+#cred a:hover {
+	color: #D0D0D0 !important;
+	text-decoration: none;
+}
+
+#page-footer {
+	font-size: 1.2em;
+	border-bottom: 1px solid #404040 !important; 
+	border-left: 1px solid #404040 !important; 
+	border-right: 1px solid #404040 !important; 
+	margin-bottom: 20px !important;
+	height: 60px;
+	padding: 0 !important;
+	width: 1022px;
+	max-width: 1020px !important;
+	min-width: 1020px !important;
+	border-top: 0;
+}
+
+.col-control {
+	height: 100%;
+}
+
+#page-footer span {
+	margin: 0 5px;
+}
+
+#cred td {
+	width: 250px;
+}
+
+#cred td.cred-center {
+	width: 500px;
+}
+
+#page-footer td.cred-right a {
+	display: none;
+}
+
+#page-footer #cred {
+	height: 100%;
+	background: #606060;
+	color: white;
+	border-top: 0;
+}
+
+#cred a {
+	color: white;
+}
+
+/* maps */
+.map_tooltip {
+	position: absolute;
+	background: white;
+	color: black;
+	padding: 1em;
+	text-align: center;
+	display: none;
+	left: 200px;
+	top: 200px;
+}
+
+.blogtitle {
+	visibility: hidden;
+}
+
+div.page {
+	border: 1px solid #404040; 
+}
+
+/* posts */
+.post, div.page {
+	border: 1px solid #404040;
+}
+
+h1.posttitle, h2.posttitle {
+	padding: .2em;
+	color: #A6752F;
+	font-size: 2.2em;
+}
+
+h1.posttitle a, h1.posttitle a:visited, h2.posttitle a, h2.posttitle a:visited {
+	color: white;
+}
+
+/* override a bad css from fusion */
+.entry img {
+	max-width: 90000px !important;
+}
+
+.entry h3 {
+	color: #A6752F;
+}
+
+.entry th {
+	background: #404040;
+	margin: 0 10px;
+	border-right: 5px solid white;
+	color: white;
+}
+
+#nav-top {
+	border: 0;
+}
+
+#nav {
+	border-bottom: 1px solid #404040;
+}
+
+#nav a, #nav a:visited {
+	font-weight: normal;
+}
+
+#nav-top a.current, #nav-top a.current:visited, #nav-top a.current:hover, #nav-top a.current:active, #nav-top li a:hover, #nav a.current, #nav a.current:visited, #nav a.current:hover, #nav a.current:active, #nav li a:hover {
+	background: #326D96 !important;
+	color: white !important;
+}
+
+#nav ul li, #nav.continuous ul ul li, #nav-top.continuous ul ul li {
+	border: 1px solid #404040 !important;
+}
+
+#nav-top ul li a, #nav ul li a {
+	color: #202020 !important;
+	background-color: #99C7E7 !important;
+}
+
+#nav ul ul li {
+	border: 1px solid #404040 !important;
+	border-bottom: none !important;
+}
+#nav ul ul li:nth-last-child(1) {
+	border-bottom: 1px solid #404040 !important;
+}
+#nav ul li a.with-arrow, #nav-top ul li a.with-arrow, #nav-top ul li a.with-arrow:hover { 
+	cursor: default;
+	background-color: #99C7E7 !important;
+	color: black !important;
+}
+
+div.suf-widget {
+	border: 1px solid #404040;
+}
+
+.suf-widget h3 {
+	color: white;
+	background-color: #BFA98C;
+}
+
+/* misc */
+.clear {
+	clear: both;
+}
+
+/* navigation */
+.nolink {
+	cursor: pointer;
+}
+
+/* about page */
+.about .aboutitem {
+	clear: both;
+}
+
+.about .aboutitem img {
+	margin: 0 0 1em 0;
+	float: left;
+}
+
+.about td:nth-child(1) {
+	width: 200px;
+}
+
+.about h3 {
+	margin: 1em 0;
+	border-bottom: 1px solid;
+}
+
+.about h3:nth-child(1) {
+	margin: 0 0 1em 0;
+}
+
+/* Maps page */
+.mapcontainer {
+}
+
+.canvascontainer  {
+	height: 400px;
+	width: 96%;
+	margin: 1.3em auto;
+	border: 1px solid #404040;
+	-webkit-box-shadow: 5px 5px 3px 1px rgba(0, 0, 0, .5);
+	-moz-box-shadow: 5px 5px 3px 1px rgba(0, 0, 0, .5);
+	box-shadow: 5px 5px 3px 1px rgba(0, 0, 0, .5);
+}
+
+#map_canvas {
+	height: 100%;
+	width: 100%;
+}
+
+.mapcontainer .label {
+	width: 100%;
+	font-size: 1.1em;
+	text-align: left;
+	margin: .8em 0 0 0;
+}
+
+.mapcontainer .label.top {
+	margin: 0;
+}
+
+.mapcontainer .label.disabled {
+}
+
+.mapcontainer .canvascontainer  {
+	margin: 0 auto;
+	height: 600px;
+}
+
+.mapcontainer .disabled {
+	color: grey;
+}
+
+.mapcontainer select {
+	width: 100%;
+}
+
+.mapcontainer .filter {
+	width: 100%;
+}
+
+.mapcontainer .markercontainer {
+	border: 1px solid #808080;
+	padding: 3px;
+}
+
+.mapcontainer label img {
+	 vertical-align:middle;
+	 margin: 0 2px;
+	 width: 33px;
+	 height: 33px;
+}
+
+.mapcontainer #paths {
+	 margin-right: 10px;
+}
+
+.mapcontainer .showtype {
+	padding: .2em;
+}
+
+.mapcontainer .showtype:nth-child(2n+1) {
+	background-color: #F0F0F0;
+}
+
+.mapcontainer .showtype:nth-last-child(1) {
+	padding: .2em 0 0 0;
+}
+
+.mapcontainer input {
+}
+
+.mapcontainer .leftmenu {
+	width: 200px;
+	float: left;
+}
+
+.mapcontainer .right {
+	width: 760px;
+	float: right;
+}
+
+.mapcontainer .clearfilter {
+	text-align: right;
+}
+
+/* legend */
+#legendcontainer {
+	position: relative;
+	width: 720px;
+	margin: 20px;
+	display: none;
+}
+
+#legendcontainer .legend_text {
+	float: left;
+	width: 29%;
+	text-align: center;
+}
+
+#legendcontainer .first {
+	text-align: left;
+	width: 5%;
+}
+
+#legendcontainer .end {
+	float: right;
+	text-align: right;
+	width: 6%;
+}
+
+#map_legend {
+	width: 100%;
+	clear: both;
+	border: 1px solid #808080;
+} 
+
+.green_gradient {
+	background: #ffffff; /* Old browsers */
+	background: -moz-linear-gradient(left,  #ffffff 0%, #009900 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,#ffffff), color-stop(100%,#009900)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(left,  #ffffff 0%,#009900 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(left,  #ffffff 0%,#009900 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(left,  #ffffff 0%,#009900 100%); /* IE10+ */
+	background: linear-gradient(left,  #ffffff 0%,#009900 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#009900',GradientType=1 ); /* IE6-9 */
+}
+
+.tooltip {
+	display: none;
+	position: absolute;
+	background-color: #B5DAF3;
+	color: black;
+	font-size: 13px;
+	border: 1px solid black;
+	padding: 5px;
+}
+
+.tooltip  .ttlabel {
+	font-weight: bold;
+}
+
+.tooltip  .ttname {
+	font-weight: bold;
+	text-align: center;
+}
+
+/* collapsible stuff */
+.collapsible .header {
+	margin-top: .7em;
+}
+
+.header h1 {
+	font-size: 1em;
+	font-weight: bold;
+	margin: 0 !important;
+}

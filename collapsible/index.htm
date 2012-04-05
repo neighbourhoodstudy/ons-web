@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
+<head> 
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ 
+	<script type='text/javascript' src="./js/jquery-1.4.2.min.js"></script>
+	<script type='text/javascript' src="./js/jquery.cookie.js"></script>
+	
+	<script type='text/javascript' src="./js/jquery.collapsible.js"></script>
+		
+	<link rel="stylesheet" type="text/css" media="screen" href="./css/demo.css" /> 
+	
+	<title>DEMO</title> 
+
+
+<script type='text/javascript'>
+$(document).ready(function() {
+	$.collapsible(".header", "group1");
+	$.collapsible(".header2", "group2");
+});
+</script>
+
+
+</head>
+
+
+<body>
+
+	
+	<div id="box">
+	
+	<h1>jQuery.collapsible demo</h1>
+	
+	<p>Go to the <a href="http://blog.ramin-hossaini.com/2010/04/27/jquery-collapsible-plugin/">Plugin homepage</a> for the latest version.</p>
+	<p>If you have any questions of comments, please visit: <br/><a href="http://www.ramin-hossaini.com">http://www.ramin-hossaini.com</a></p>
+	<p>&nbsp;</p>
+	<p>Try refresh the page to make sure that the state was saved.</p>
+	
+<div class="module ">
+	<div class="header">
+		<h1>Header #1</h1>
+	</div>
+	<div class="content"> <!-- the 'content' class is only for styling -->
+		<p>Content comes here</p>
+	</div>
+</div>
+
+<div class="module">
+	<div class="header">
+		<h1>Header #2</h1>
+	</div>
+	<div class="content">
+		<p>Content comes here</p>
+	</div>
+</div>
+
+<div class="module">
+	<div class="header collapsed">
+		<h1>Header #3</h1>
+	</div>
+	<div class="content">
+		<p>Content comes here</p>
+	</div>
+</div>
+
+<hr/>
+<br/>
+
+<div class="module">
+	<div class="header2">
+		<h1>Header #3</h1>
+	</div>
+	<div class="content">
+		<p>Content comes here</p>
+	</div>
+</div>
+
+<div class="module">
+	<div class="header2">
+		<h1>Header #3</h1>
+	</div>
+	<div class="content">
+		<p>Content comes here</p>
+	</div>
+</div>
+	
+	</div> <!-- box -->
+
+	
+<script type="text/javascript">	
+</script>
+
+</body>
+
+</html>
