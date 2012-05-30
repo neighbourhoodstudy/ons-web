@@ -976,13 +976,11 @@ ons.updateFilter = function(nodeid, labelid, category) {
 	}
 	
 	if (category) {
-		dojo.removeClass(label, 'disabled');
-		
+		if (label) dojo.removeClass(label, 'disabled');
 		ons.filterMap(ons._onsLayer, null);
-		
 	} else {
 		dojo.attr(node, 'disabled', true);
-		dojo.addClass(label, 'disabled');
+		if (label) dojo.addClass(label, 'disabled');
 		ons.filterMap(ons._onsLayer, null);
 	}
 }
@@ -1043,6 +1041,7 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color"], function(ur
 					}
 					ons.showMap('map_canvas', id);
 				}
+
 				if (dojo.byId('chart_div')) {
 					ons.showChart('chart_div');
 				}

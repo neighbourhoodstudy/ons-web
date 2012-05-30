@@ -27,6 +27,20 @@
 	<div class="canvascontainer">
 		<div id="map_canvas"></div>
 	</div>
+	
+	<div>
+		<span> Zoom to Neighbourhood: </span>
+		<select id="neighbourhood_select" onchange="ons.fitMap(ons._currentMap, this.value)"></select>
+	</div>
+
+	<div>
+		<span> Categories: </span>
+		<select id="category_select" onchange="ons.updateFilter('filter_select', null, this.value);"></select>
+	</div>
+	<div>
+		<span> Filter By: </span>
+		<select id="filter_select" onchange="ons.filterMap(ons._onsLayer, this.value);"></select>
+	</div>
 
 </body>
 </html>
