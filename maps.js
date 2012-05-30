@@ -1026,6 +1026,7 @@ google.maps.Map.prototype.clearMarkers = function() {
 
 require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color"], function(url, dom, ready, color){
          ready(function(){
+			if (typeof $j == "undefined") { $j = $; }
 			//set up our collapsible headers (faq page)
 			$j.collapsible('.collapsible .header')
 
