@@ -331,6 +331,8 @@ div.suf-widget {
 }
 
 .mapcontainer .markercontainer {
+	overflow: auto;
+	height: 200px;
 	border: 1px solid #808080;
 	padding: 3px;
 }
