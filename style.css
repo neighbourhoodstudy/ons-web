@@ -16,6 +16,16 @@ body {
 	background: white;
 }
 
+fieldset {
+	padding: 5px;
+	margin: .5em .5em 0 .5em;
+	border: 1px solid #AAA;
+}
+
+legend {
+	padding: 0 .75em;
+}
+
 .shadow {
 -webkit-box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, .5);
 -moz-box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, .5);
@@ -303,7 +313,6 @@ div.suf-widget {
 	width: 100%;
 	font-size: 1.1em;
 	text-align: left;
-	margin: .8em 0 0 0;
 }
 
 .mapcontainer .label.top {
@@ -331,10 +340,8 @@ div.suf-widget {
 }
 
 .mapcontainer .markercontainer {
+	height: 250px;
 	overflow: auto;
-	height: 200px;
-	border: 1px solid #808080;
-	padding: 3px;
 }
 
 .mapcontainer label img {
@@ -364,6 +371,7 @@ div.suf-widget {
 }
 
 .mapcontainer .leftmenu {
+	clear: both;
 	width: 200px;
 	float: left;
 }
