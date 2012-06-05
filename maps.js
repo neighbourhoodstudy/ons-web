@@ -351,6 +351,276 @@ ons.columns = [{
     column: 'before 1946',
 	category: 'Age of Construction',
 	table: '1If6m2FXPKVC0vjRnIbeV8MBdBCUKQiHL5znHWZQ'
+}, {
+    label: '% between 46 and 60',
+    column: '1946 to 1960',
+	category: 'Age of Construction',
+	table: '1If6m2FXPKVC0vjRnIbeV8MBdBCUKQiHL5znHWZQ'
+}, {
+    label: '% between 61 and 70',
+    column: '1961 to 1970',
+	category: 'Age of Construction',
+	table: '1If6m2FXPKVC0vjRnIbeV8MBdBCUKQiHL5znHWZQ'
+}, {
+    label: '% between 71 and 80',
+    column: '1971 to 1980',
+	category: 'Age of Construction',
+	table: '1If6m2FXPKVC0vjRnIbeV8MBdBCUKQiHL5znHWZQ'
+}, {
+	label: 'Total population by citizenship',
+	column: 'Total population by citizenship',
+	category: 'Citzenship',
+	table: 4142362
+}, {
+	label: '% Canadian Citizens (% of Total Population)',
+	column: '% Canadian Citizens (% of Total Population)',
+	category: 'Citzenship',
+	table: 4142362
+}, {
+	label: '% Not Canadian Citizens (% of Total Population)',
+	column: '% Not Canadian Citizens (% of Total Population)',
+	category: 'Citzenship',
+	table: 4142362
+}, {
+	label: '% Immigrants (% of Total Population)',
+	column: '% Immigrants (% of Total Population)',
+	category: 'Citzenship',
+	table: 4142362
+}, {
+	label: '% Non-immigrants (% of Total Population)',
+	column: '% Non-immigrants (% of Total Population)',
+	category: 'Citzenship',
+	table: 4142362
+}, {
+	label: '% Born in province of residence (% of Total Population)',
+	column: '% Born in province of residence (% of Total Population)',
+	category: 'Citzenship',
+	table: 4142362
+}, {
+	label: '% Born outside province of residence (% of Total Population)',
+	column: '% Born outside province of residence (% of Total Population)',
+	category: 'Citzenship',
+	table: 4142362
+}, {
+	label: 'Average income of individuals',
+	column: 'Average income of individuals',
+	category: 'Average Income',
+	table: 4142362
+}, {
+	label: 'Average Household Income',
+	column: 'Average Household Income',
+	category: 'Average Income',
+	table: 4142362
+}, {
+	label: '% give unpaid care (including unpaid household)',
+	column: '% give unpaid care (including unpaid household)',
+	category: 'Care Givers',
+	table: 4142362
+}, {
+	label: 'unpaid care for children and seniors',
+	column:  'unpaid care for children and seniors',
+	category: 'Care Givers',
+	table: 4142362
+}, {
+	label: '% looking after children without pay',
+	column: '% looking after children without pay',
+	category: 'Care Givers',
+	table: 4142362
+}, {
+	label: '% Single-detached house',
+	column: '% Single-detached house',
+	category: 'Dwelling Type',
+	table: 4142362
+}, {
+	label: '% Semi-detached house',
+	column: '% Semi-detached house',
+	category: 'Dwelling Type',
+	table: 4142362
+}, {
+	label: '% Row house',
+	column: '% Row house',
+	category: 'Dwelling Type',
+	table: 4142362
+}, {
+	label: '% Apartment',
+	column: '% Apartment',
+	category: 'Dwelling Type',
+	table: 4142362
+}, {
+	label:  'duplex',
+	column:  'duplex',
+	category: 'Dwelling Type',
+	table: 4142362
+}, {
+	label: '% Apartment building that has five or more storeys',
+	column: '% Apartment building that has five or more storeys',
+	category: 'Dwelling Type',
+	table: 4142362
+}, {
+	label: '% Apartment building that has fewer than five storeys',
+	column: '% Apartment building that has fewer than five storeys',
+	category: 'Dwelling Type',
+	table: 4142362
+}, {
+	label: '% other single-attached house',
+	column: '% other single-attached house',
+	category: 'Dwelling Type',
+	table: 4142362
+}, {
+	label: '% Renter Occupied',
+	column: '% Renter Occupied',
+	category: 'Dwelling Type',
+	table: 4142362
+}, {
+	label: '% Owner Occupied',
+	column: '% Owner Occupied',
+	category: 'Dwelling Type',
+	table: 4142362
+}, {
+	label: 'Number of dwellings',
+	column: 'Number of dwellings',
+	category: 'Dwellings',
+	table: 4142362
+}, {
+	label: 'Average number of persons per room',
+	column: 'Average number of persons per room',
+	category: 'Dwellings',
+	table: 4142362
+}, {
+	label: '% of dwellings needing major repairs',
+	column: '% of dwellings needing major repairs',
+	category: 'Dwellings',
+	table: 4142362
+}, {
+	label: '% needing regular maintenance only',
+	column: '% needing regular maintenance only',
+	category: 'Dwellings',
+	table: 4142362
+}, {
+	label: '% of dwellings needing minor repairs',
+	column: '% of dwellings needing minor repairs',
+	category: 'Dwellings',
+	table: 4142362
+}, {
+	label: 'Average value of dwelling (owener occupied private non-farm)',
+	column: 'Average value of dwelling (owener occupied private non-farm)',
+	category: 'Dwellings',
+	table: 4142362
+}, {
+	label:  'non-reserve dwellings',
+	column:  'non-reserve dwellings',
+	category: 'Dwellings',
+	table: 4142362
+}, {
+	label: '% No certificate',
+	column: '% No certificate',
+	category: 'Dwellings',
+	table: 4142362
+}, {
+	label:  'diploma or degree',
+	column:  'diploma or degree',
+	category: 'Education',
+	table: 4142362
+}, {
+	label: '% High school certificate or equivalent',
+	column: '% High school certificate or equivalent',
+	category: 'Education',
+	table: 4142362
+}, {
+	label: '% Apprenticeship or trades certificate or diploma',
+	column: '% Apprenticeship or trades certificate or diploma',
+	category: 'Education',
+	table: 4142362
+}, {
+	label: '% College',
+	column: '% College',
+	category: 'Education',
+	table: 4142362
+}, {
+	label: '% Full time or full year',
+	column: '% Full time or full year',
+	category: 'Employment Type',
+	table: 4142362
+}, {
+	label: '% Part time or part year',
+	column: '% Part time or part year',
+	category: 'Employment Type',
+	table: 4142362
+}, {
+	label: '% Did not work in 2005',
+	column: '% Did not work in 2005',
+	category: 'Employment Type',
+	table: 4142362
+}, {
+	label: '% with aboriginal identity',
+	column: '% with aboriginal identity',
+	category: 'First Nations',
+	table: 4142362
+}, {
+	label: '% married couples (out of total number of census families in private households)',
+	column: '% married couples (out of total number of census families in private households)',
+	category: 'Household Type',
+	table: 4142362
+}, {
+	label: '% common-law couples(out of total number of census families in private households)',
+	column: '% common-law couples(out of total number of census families in private households)',
+	category: 'Household Type',
+	table: 4142362
+}, {
+	label:  '% lone parent families(out of total number of census families in private households)',
+	column: '% lone parent families(out of total number of census families in private households)',
+	category: 'Household Type',
+	table: 4142362
+}, {
+	label: '% Persons in private households living alone',
+	column: '% Persons in private households living alone',
+	category: 'Household Type',
+	table: 4142362
+}, {
+	label: '% members of a family household (including one-family and multiple-family households)',
+	column: '% members of a family household (including one-family and multiple-family households)',
+	category: 'Household Type',
+	table: 4142362
+}, {
+	label: '% members of one-family household',
+	column: '% members of one-family household',
+	category: 'Household Type',
+	table: 4142362
+}, {
+	label: '% members of multiple-family household',
+	column: '% members of multiple-family household',
+	category: 'Household Type',
+	table: 4142362
+}, {
+	label: '% members of a non-family household',
+	column: '% members of a non-family household',
+	category: 'Household Type',
+	table: 4142362
+}, {
+	label: '% Under 5 years',
+	column: '% Under 5 years',
+	category: 'Imigration by Age',
+	table: 4142362
+}, {
+	label: '% 5 to 14 years',
+	column: '% 5 to 14 years',
+	category: 'Imigration by Age',
+	table: 4142362
+}, {
+	label: '% 15 to 24 years',
+	column: '% 15 to 24 years',
+	category: 'Imigration by Age',
+	table: 4142362
+}, {
+	label: '% 25 to 44 years',
+	column: '% 25 to 44 years',
+	category: 'Imigration by Age',
+	table: 4142362
+}, {
+	label: '% 45 years and over',
+	column: '% 45 years and over',
+	category: 'Imigration by Age',
+	table: 4142362
 }];
 
 
@@ -358,8 +628,11 @@ ons.dataTables = [{
 	noColumns: 79,
 	startColumn: 0
 }, {
-	noColumns: 1,
+	noColumns: 4,
 	startColumn: 79
+}, {
+	noColumns: 51,
+	startColumn: 83
 }];
 
 
@@ -557,12 +830,12 @@ ons.findNeighbourhood = function(id, name) {
 				r = n;
 			}
 		});
-		
 		return r;
 	});
 	
 	return ret;
 }
+
 
 /**
  * queries our fusiontable for the coordinates of the id (or ids) and centers the map around it
@@ -688,17 +961,19 @@ ons.createQueries = function() {
 	
 	var queries = [];
 	for (var id in cols) {
+	
+		if (id != (ons.mapid + "")) {
+			continue;
+		}
 
 	
 		var queryTextu = "SELECT " 
 			+ "'" + cols[id].join("','") + "'" 
 			+ " FROM " + id + " ORDER BY 'Neighbourhood Name'";
-	
 
 		queryText = encodeURIComponent(queryTextu);
 		queries.push( new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText));
 		var def = new dojo.Deferred();
-		//def.then(function(response) {alert('in callback ' + response.getDataTable().getNumberOfRows() );});
 		ons.callbackObjects.length = ons.callbackObjects.length + 1;	
 		ons.callbackObjects[ons.callbackObjects.length-1] = def;
 	}
@@ -721,11 +996,10 @@ ons.getAllNeighbourhoods = function() {
 	}
 	
 	var arr = [];
-	arr.length = ons.columns.length;
 	ons.cache["neighbourhoods"] = arr;
 	var queries = ons.createQueries();
 	
-	var dlistObj = new dojo.DeferredList([ons.callbackObjects[0], ons.callbackObjects[1]]);
+	var dlistObj = new dojo.DeferredList([ons.callbackObjects[0]]);
 	dojo.forEach (queries, function(query) {
 
 		query.send(function(response) {
@@ -755,9 +1029,6 @@ ons.getAllNeighbourhoods = function() {
 			
 			for(i = 0; i < numRows; i++) {
 				var retObj = {};
-				if (ons.cache["neighbourhoods"][i]) {
-					retObj = ons.cache["neighbourhoods"][i];
-				}
 				for(j = 0; j < numCols; j++) {
 					var value = response.getDataTable().getValue(i, j);
 					var pos = j + startCol;
@@ -767,7 +1038,7 @@ ons.getAllNeighbourhoods = function() {
 					}
 					retObj[key] = value;
 				}
-				ons.cache["neighbourhoods"][i] = retObj;
+				ons.cache["neighbourhoods"].push(retObj);
 			} 
 		}
 		def.callback(ons.cache["neighbourhoods"]);
@@ -999,8 +1270,9 @@ ons.filterMap = function(layer, filter) {
 			var add = diff/resolution;
 			
 			for(var name in values) {
-				var value = values[name];
+
 				ons.findNeighbourhood(null, name).then(function(n) {
+					var value = values[name];
 					var h = 120; //green
 					var s = 100;
 					var percent = value/max;
@@ -1008,10 +1280,11 @@ ons.filterMap = function(layer, filter) {
 					var color = dojox.color.fromHsl(h, s, l);
 					dojo.forEach(n.polygons, function(poly) {
 						poly.setOptions({fillColor: color.toHex(), fillOpacity: .7});
-						
+							
 						poly._filter = {name: n['Neighbourhood Name'], filter: filterLabel, value: value};
 					});
 				});
+
 			}
 			//set out our legend
 			if (legend) {
@@ -1139,6 +1412,19 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 				if (dojo.byId('chart_div')) {
 					ons.showChart('chart_div');
 				}
+
+				var catnode = dojo.byId('category_select');
+				if (catnode) {
+					var created = {};
+					dojo.empty(catnode);
+					dojo.create('option', {innerHTML:"", value: null}, catnode);
+					dojo.forEach(ons.columns, function(n) {
+							if (n.category && ! created[n.category]) {
+								dojo.create('option', {innerHTML:n.category, value: n.category}, catnode);
+								created[n.category] = true;
+							}
+					});
+				};
 				
 				//if we have a 'neighbourhood_select', populate it with neighbourhoods
 				if (dojo.byId('neighbourhood_select')) {
@@ -1152,18 +1438,7 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 						});
 					}
 					
-					var catnode = dojo.byId('category_select');
-					if (catnode) {
-						var created = {};
-						dojo.empty(catnode);
-						dojo.create('option', {innerHTML:"", value: null}, catnode);
-						dojo.forEach(ons.columns, function(n) {
-								if (n.category && ! created[n.category]) {
-									dojo.create('option', {innerHTML:n.category, value: n.category}, catnode);
-									created[n.category] = true;
-								}
-						});
-					};
+
 				}
 			});
 		});
