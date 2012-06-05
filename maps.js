@@ -346,7 +346,22 @@ ons.columns = [{
     label: 'Female 80+ years',
     column: 'F80',
 	category: 'Population by Age and Gender'
+}, {
+    label: '% before 1946',
+    column: 'before 1946',
+	category: 'Age of Construction',
+	table: '1If6m2FXPKVC0vjRnIbeV8MBdBCUKQiHL5znHWZQ'
 }];
+
+
+ons.dataTables = [{
+	noColumns: 79,
+	startColumn: 0
+}, {
+	noColumns: 1,
+	startColumn: 79
+}];
+
 
 //Name:	Age of Construction.csv
 //Numeric ID:	2730132
@@ -651,6 +666,46 @@ ons.parseKml = function(map, kml) {
     return ret;
 }
 
+/*
+* array of callbacks used by the deferred list to marshall the returning queries
+*/
+
+ons.callbackObjects = new Array();
+
+/*
+* create the queries for all the tables used to populate the cache
+*/
+
+ons.createQueries = function() {
+	var cols = [];
+	dojo.forEach(ons.columns, function(col) {
+		var tableId  = (col.table ? col.table : ons.mapid) + "";
+		if (cols[tableId] == null) {
+			cols[tableId] = new Array();
+		}
+		cols[tableId].push(col.column ? col.column : col.label);
+	});
+	
+	var queries = [];
+	for (var id in cols) {
+
+	
+		var queryTextu = "SELECT " 
+			+ "'" + cols[id].join("','") + "'" 
+			+ " FROM " + id + " ORDER BY 'Neighbourhood Name'";
+	
+
+		queryText = encodeURIComponent(queryTextu);
+		queries.push( new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText));
+		var def = new dojo.Deferred();
+		//def.then(function(response) {alert('in callback ' + response.getDataTable().getNumberOfRows() );});
+		ons.callbackObjects.length = ons.callbackObjects.length + 1;	
+		ons.callbackObjects[ons.callbackObjects.length-1] = def;
+	}
+	return queries;
+}
+
+
 
 /**
  * queries our fusiontable for all of the neighbourhoods, and all of the data associated with it
@@ -658,16 +713,6 @@ ons.parseKml = function(map, kml) {
  */
 ons.getAllNeighbourhoods = function() {
 
-	var cols = [];
-	dojo.forEach(ons.columns, function(col) { cols.push(col.column ? col.column : col.label); });
-
-	var queryTextu = "SELECT " 
-		+ "'" + cols.join("','") + "'" 
- 		+ " FROM " + ons.mapid + " ORDER BY 'Neighbourhood Name'";
-		
-	queryText = encodeURIComponent(queryTextu);
-
-	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
 	var def = new dojo.Deferred();
 	
 	if (ons.cache["neighbourhoods"]) {
@@ -675,34 +720,60 @@ ons.getAllNeighbourhoods = function() {
 		return def;
 	}
 	
-	query.send(function(response) {
-		if (!response || !response.getDataTable()) { 
-			if (console && console.error) { console.error(response, queryTextu, queryText); }
-			return;
-		}
-		
-		var numRows = response.getDataTable().getNumberOfRows();
-		var numCols = response.getDataTable().getNumberOfColumns();
+	var arr = [];
+	arr.length = ons.columns.length;
+	ons.cache["neighbourhoods"] = arr;
+	var queries = ons.createQueries();
+	
+	var dlistObj = new dojo.DeferredList([ons.callbackObjects[0], ons.callbackObjects[1]]);
+	dojo.forEach (queries, function(query) {
 
-		//create an array
-		var arr = [];
-		for(i = 0; i < numRows; i++) {
-			var retObj = {};
-			arr.push(retObj);
-			for(j = 0; j < numCols; j++) {
-				var value = response.getDataTable().getValue(i, j);
-				var key = ons.columns[j].column ? ons.columns[j].column : ons.columns[j].label;
-				if (key == "geometry") {
-					value = ons.parseKml(ons._currentMap,value);
-				}
-				
-				retObj[key] = value;
-			}
-		}  
-				
-		ons.cache["neighbourhoods"] = arr;
-		def.callback(arr);
+		query.send(function(response) {
+			var def = ons.callbackObjects.pop();
+			def.callback(response);
+		});
 	});
+	
+	dlistObj.then(function(retVal) {
+		
+		for(resps = 0; resps < retVal.length; resps++) {
+			var response = retVal[resps][1];
+
+			if (!response || !response.getDataTable()) { 
+				if (console && console.error) { console.error(response, "", ""); }
+				continue;
+			}
+	
+			var numRows = response.getDataTable().getNumberOfRows();
+			var numCols = response.getDataTable().getNumberOfColumns();
+			var startCol = 0;
+			dojo.forEach (ons.dataTables, function(dataTable) {
+				if (numCols == dataTable.noColumns) {
+					startCol = dataTable.startColumn;
+				}
+			});
+			
+			for(i = 0; i < numRows; i++) {
+				var retObj = {};
+				if (ons.cache["neighbourhoods"][i]) {
+					retObj = ons.cache["neighbourhoods"][i];
+				}
+				for(j = 0; j < numCols; j++) {
+					var value = response.getDataTable().getValue(i, j);
+					var pos = j + startCol;
+					var key = ons.columns[pos].column ? ons.columns[pos].column : ons.columns[pos].label;
+					if (key == "geometry") {
+						value = ons.parseKml(ons._currentMap,value);
+					}
+					retObj[key] = value;
+				}
+				ons.cache["neighbourhoods"][i] = retObj;
+			} 
+		}
+		def.callback(ons.cache["neighbourhoods"]);
+	});
+
+
 	
 	return def;
 } 
@@ -858,11 +929,31 @@ ons.showMap = function(mapnodeid, id) {
 	//return {map: gmap, layers: [layer]};
 }
 
+
+/*
+* get the file id from the column table
+* @param - column
+*/
+
+ons.getFileId = function(column) {
+	if (column == null) {
+		return ons.mapid;
+	}
+	var fileId = ons.mapid;
+	dojo.forEach(ons.columns, function(col) {
+		if (col.column == column) {
+			fileId = col.table ? col.table : ons.mapid;
+		}
+	});
+	return fileId;
+}
+
+
 ons.filterMap = function(layer, filter) {
 
 	var legend = dojo.byId("map_legend");
 	var legend_container = dojo.byId("legendcontainer");
-	var queryText = "SELECT '" + filter + "', 'Neighbourhood Name' FROM " + ons.mapid;
+	var queryText = "SELECT '" + filter + "', 'Neighbourhood Name' FROM " + ons.getFileId(filter);
 	
 	queryText = encodeURIComponent(queryText);
 
@@ -1025,7 +1116,7 @@ google.maps.Map.prototype.clearMarkers = function() {
     this.markers = new Array();
 };
 
-require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color"], function(url, dom, ready, color){
+require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/DeferredList"], function(url, dom, ready, color, deferredlist){
          ready(function(){
 			if (typeof $j == "undefined") { $j = $; }
 			//set up our collapsible headers (faq page)
