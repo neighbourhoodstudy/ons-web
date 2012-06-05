@@ -347,26 +347,6 @@ ons.columns = [{
     column: 'F80',
 	category: 'Population by Age and Gender'
 }, {
-    label: '% before 1946',
-    column: 'before 1946',
-	category: 'Age of Construction',
-	table: '1If6m2FXPKVC0vjRnIbeV8MBdBCUKQiHL5znHWZQ'
-}, {
-    label: '% between 46 and 60',
-    column: '1946 to 1960',
-	category: 'Age of Construction',
-	table: '1If6m2FXPKVC0vjRnIbeV8MBdBCUKQiHL5znHWZQ'
-}, {
-    label: '% between 61 and 70',
-    column: '1961 to 1970',
-	category: 'Age of Construction',
-	table: '1If6m2FXPKVC0vjRnIbeV8MBdBCUKQiHL5znHWZQ'
-}, {
-    label: '% between 71 and 80',
-    column: '1971 to 1980',
-	category: 'Age of Construction',
-	table: '1If6m2FXPKVC0vjRnIbeV8MBdBCUKQiHL5znHWZQ'
-}, {
 	label: 'Total population by citizenship',
 	column: 'Total population by citizenship',
 	category: 'Citzenship',
@@ -621,6 +601,276 @@ ons.columns = [{
 	column: '% 45 years and over',
 	category: 'Imigration by Age',
 	table: 4142362
+}, {
+	label: '% before 1946',
+	column: '% before 1946',
+	category: 'Age of Construction',
+	table: 4142834
+}, {
+	label: '% 1946 to 1960',
+	column: '% 1946 to 1960',
+	category:  'Age of Construction',
+	table: 4142834
+}, {
+	label: '% 1961 to 1970',
+	column: '% 1961 to 1970',
+	category: 'Age of Construction', 
+	table: 4142834
+}, {
+	label: '% 1971 to 1980',
+	column: '% 1971 to 1980',
+	category: 'Age of Construction', 
+	table: 4142834
+}, {
+	label: '% 1981 to 1985',
+	column: '% 1981 to 1985',
+	category: 'Age of Construction', 
+	table: 4142834
+}, {
+	label: '% 1986 to 1990',
+	column: '% 1986 to 1990',
+	category: 'Age of Construction', 
+	table: 4142834
+}, {
+	label: '% 1991 to 1995',
+	column: '% 1991 to 1995',
+	category: 'Age of Construction', 
+	table: 4142834
+}, {
+	label: '% 1996 to 2000',
+	column: '% 1996 to 2000',
+	category: 'Age of Construction', 
+	table: 4142834
+}, {
+	label: '% 2001 to 2006',
+	column: '% 2001 to 2006',
+	category: 'Age of Construction', 
+	table: 4142834
+}, {
+	label: '% 1st generation',
+	column: '% 1st generation',
+	category: 'Immigration',
+	table: 4142834
+}, {
+	label: '% 2nd generation',
+	column: '% 2nd generation',
+	category: 'Immigration', 
+	table: 4142834
+}, {
+	label: '% 3rd generation',
+	column: '% 3rd generation',
+	category: 'Immigration', 
+	table: 4142834
+}, {
+	label: '% Immigrated from 1996 to 2000',
+	column: '% Immigrated from 1996 to 2000',
+	category:  'Immigration',
+	table: 4142834
+}, {
+	label: '% Immigrated from 2001 to 2006',
+	column: '% Immigrated from 2001 to 2006',
+	category: 'Immigration', 
+	table: 4142834
+}, {
+	label: 'Not in the labour force',
+	column: 'Not in the labour force',
+	category: 'Labour', 
+	table: 4142834
+}, {
+	label: 'Participation rate',
+	column: 'Participation rate',
+	category:  'Labour', 
+	table: 4142834
+}, {
+	label: '% Employed',
+	column: '% Employed',
+	category:  'Labour', 
+	table: 4142834
+}, {
+	label: '% Unemployed',
+	column: '% Unemployed',
+	category:  'Labour', 
+	table: 4142834
+}, {
+	label: 'Total population',
+	column: 'Total population',
+	category: 'Language Spoken',
+	table: 4142834
+}, {
+	label: '% English',
+	column: '% English',
+	category:  'Language Spoken',
+	table: 4142834
+}, {
+	label: '% French',
+	column: '% French',
+	category: 'Language Spoken', 
+	table: 4142834
+}, {
+	label: '% Non-Official Languages',
+	column: '% Non-Official Languages',
+	category: 'Language Spoken', 
+	table: 4142834
+}, {
+	label: 'English',
+	column: 'English',
+	category: 'Language Spoken', 
+	table: 4142834
+}, {
+	label: 'French',
+	column: 'French',
+	category: 'Language Spoken', 
+	table: 4142834
+}, {
+	label: 'Non-Official Languages',
+	column: 'Non-Official Languages',
+	category:  'Language Spoken',
+	table: 4142834
+}, {
+	label: '% English vs Ottawa Avg',
+	column: '% English vs Ottawa Avg',
+	category: 'Language Spoken', 
+	table: 4142834
+}, {
+	label: '% French vs Ottawa Avg',
+	column: '% French vs Ottawa Avg',
+	category: 'Language Spoken', 
+	table: 4142834
+}, {
+	label: '% Non-Official Languages vs Ottawa Avg',
+	column: '% Non-Official Languages vs Ottawa Avg',
+	category: 'Language Spoken', 
+	table: 4142834
+}, {
+	label: 'Prevalence of low income before tax',
+	column: 'Prevalence of low income before tax',
+	category: 'Low Income',
+	table: 4142834
+}, {
+	label: 'Prevalence of low income after tax',
+	column: 'Prevalence of low income after tax',
+	category:  'Low Income',
+	table: 4142834
+}, {
+	label: '% of Economic Families living under the LICO (before tax)',
+	column: '% of Economic Families living under the LICO (before tax)',
+	category:  'Low Income',
+	table: 4142834
+}, {
+	label: '% of Economic Families living under the LICO (after tax)',
+	column: '% of Economic Families living under the LICO (after tax)',
+	category: 'Low Income', 
+	table: 4142834
+}, {
+	label: 'Children living under LICO (before tax)',
+	column: 'Children living under LICO (before tax)',
+	category:  'Low Income',
+	table: 4142834
+}, {
+	label: 'Children living under LICO (after tax)',
+	column: 'Children living under LICO (after tax)',
+	category:  'Low Income',
+	table: 4142834
+}, {
+	label: 'Seniors living under LICO (before tax)',
+	column: 'Seniors living under LICO (before tax)',
+	category: 'Low Income', 
+	table: 4142834
+}, {
+	label: 'Seniors living under LICO (after tax)',
+	column: 'Seniors living under LICO (after tax)',
+	category:  'Low Income',
+	table: 4142834
+}, {
+	label: '% Non-movers (1 Year Ago)',
+	column: '% Non-movers (1 Year Ago)',
+	category: 'Mobility',
+	table: 4142834
+}, {
+	label: '% Movers (1 Year Ago)',
+	column: '% Movers (1 Year Ago)',
+	category:  'Mobility',
+	table: 4142834
+}, {
+	label: '% Non-migrants (% of the population of movers (1 Year Ago))',
+	column: '% Non-migrants (% of the population of movers (1 Year Ago))',
+	category:  'Mobility',
+	table: 4142834
+}, {
+	label: '% Migrants (% of the population of movers (1 Year Ago))',
+	column: '% Migrants (% of the population of movers (1 Year Ago))',
+	category:  'Mobility',
+	table: 4142834
+}, {
+	label: '% Interprovincial (% of the population of migrants (1 Year Ago))',
+	column: '% Interprovincial (% of the population of migrants (1 Year Ago))',
+	category:  'Mobility',
+	table: 4142834
+}, {
+	label: '% External migrants (% of the population of migrants (1 Year Ago))',
+	column: '% External migrants (% of the population of migrants (1 Year Ago))',
+	category:  'Mobility',
+	table: 4142834
+}, {
+	label: '% Non-movers (5 years ago)',
+	column: '% Non-movers (5 years ago)',
+	category:  'Mobility',
+	table: 4142834
+}, {
+	label: '% Movers (5 years ago)',
+	column: '% Movers (5 years ago)',
+	category:  'Mobility',
+	table: 4142834
+}, {
+	label: 'Total experienced labour force 15 years and over',
+	column: 'Total experienced labour force 15 years and over',
+	category: 'Occupation',
+	table: 4142834
+}, {
+	label: '% Total experienced labour force 15 years and over (% of Total Labour Force)',
+	column: '% Total experienced labour force 15 years and over (% of Total Labour Force)',
+	category:  'Occupation',
+	table: 4142834
+}, {
+	label: '% Management ',
+	column: '% Management ',
+	category: 'Occupation', 
+	table: 4142834
+}, {
+	label: '% Business',
+	column: '% Business',
+	category: 'Occupation', 
+	table: 4142834
+}, {
+	label: ' finance and administration ',
+	column: ' finance and administration ',
+	category:  'Occupation',
+	table: 4142834
+}, {
+	label: '% Natural and applied sciences and related',
+	column: '% Natural and applied sciences and related',
+	category:  'Occupation',
+	table: 4142834
+}, {
+	label: '% Health occupations',
+	column: '% Health occupations',
+	category:  'Occupation',
+	table: 4142834
+}, {
+	label: '% Construction industries',
+	column: '% Construction industries',
+	category:  'Occupation',
+	table: 4142834
+}, {
+	label: '% Retail trade',
+	column: '% Retail trade',
+	category:  'Occupation',
+	table: 4142834
+}, {
+	label: '% Other services (except public administration)',
+	column: '% Other services (except public administration)',
+	category:  'Occupation',
+	table: 4142834
 }];
 
 
@@ -628,11 +878,11 @@ ons.dataTables = [{
 	noColumns: 79,
 	startColumn: 0
 }, {
-	noColumns: 4,
+	noColumns: 51,
 	startColumn: 79
 }, {
-	noColumns: 51,
-	startColumn: 83
+	noColumns: 53,
+	startColumn: 130
 }];
 
 
