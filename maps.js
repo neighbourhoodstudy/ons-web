@@ -871,6 +871,146 @@ ons.columns = [{
 	column: '% Other services (except public administration)',
 	category:  'Occupation',
 	table: 4142834
+}, {
+	label: 'Total population ',
+	column: 'Total population ',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: '% English only',
+	column: '% English only',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: '% French only',
+	column: '% French only',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: '% English and French',
+	column: '% English and French',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: '% neither English nor French',
+	column: '% neither English nor French',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: 'English only',
+	column: 'English only',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: 'French only',
+	column: 'French only',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: 'English and French',
+	column: 'English and French',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: 'Neither English nor French',
+	column: 'Neither English nor French',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: '% English only vs Ottawa Avg',
+	column: '% English only vs Ottawa Avg',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: '% French only vs Ottawa Avg',
+	column: '% French only vs Ottawa Avg',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: '% English and French vs Ottawa Avg',
+	column: '% English and French vs Ottawa Avg',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: '% Neither English nor French vs Ottawa Avg',
+	column: '% Neither English nor French vs Ottawa Avg',
+	category: 'Official Language Knowledge',
+	table: 4142553
+}, {
+	label: '% Seniors Living Alone (% of Total Population of Seniors)',
+	column: '% Seniors Living Alone (% of Total Population of Seniors)',
+	category: 'Seniors',
+	table: 4142553
+}, {
+	label: '% Seniors Living Alone (% of Total Population)',
+	column: '% Seniors Living Alone (% of Total Population)',
+	category: 'Seniors',
+	table: 4142553
+}, {
+	label: 'Total Response - Mode of transportation',
+	column: 'Total Response - Mode of transportation',
+	category: 'Seniors',
+	table: 4142553
+}, {
+	label: '% Car driver',
+	column: '% Car driver',
+	category: 'Transportation',
+	table: 4142553
+}, {
+	label:  'truck driver',
+	column:  'truck driver',
+	category: 'Transportation',
+	table: 4142553
+}, {
+	label:  'van driver',
+	column:  'van driver',
+	category: 'Transportation',
+	table: 4142553
+}, {
+	label:  'as driver',
+	column:  'as driver',
+	category: 'Transportation',
+	table: 4142553
+}, {
+	label: '% Car passenger',
+	column: '% Car passenger',
+	category: 'Transportation',
+	table: 4142553
+}, {
+	label:  'truck passenger',
+	column:  'truck passenger',
+	category: 'Transportation',
+	table: 4142553
+}, {
+	label:  'van passenger',
+	column:  'van passenger',
+	category: 'Transportation',
+	table: 4142553
+}, {
+	label:  'as passenger',
+	column:  'as passenger',
+	category: 'Transportation',
+	table: 4142553
+}, {
+	label: '% Visible minority population',
+	column: '% Visible minority population',
+	category: 'Visible Minorities',
+	table: 4142553
+}, {
+	label: 'Number of Youth in the Labour Force',
+	column: 'Number of Youth in the Labour Force',
+	category: 'Youth Employment',
+	table: 4142553
+}, {
+	label: '% Youth employment',
+	column: '% Youth employment',
+	category: 'Youth Employment',
+	table: 4142553
+}, {
+	label: '% Youth unemployment',
+	column: '% Youth unemployment',
+	category: 'Youth Employment',
+	table: 4142553
 }];
 
 
@@ -883,6 +1023,9 @@ ons.dataTables = [{
 }, {
 	noColumns: 53,
 	startColumn: 130
+}, {
+	noColumns: 28,
+	startColumn: 183
 }];
 
 
