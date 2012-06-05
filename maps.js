@@ -961,13 +961,16 @@ ons.filterMap = function(layer, filter) {
  * @param category the new category
  */
 ons.updateFilter = function(nodeid, labelid, category) {
+	if (category == "null") {
+		category = null;
+	}
 	var node = dojo.byId(nodeid);
 	var label = dojo.byId(labelid);
 	
 	if (node) {
 		dojo.attr(node, 'disabled', false);
 		dojo.empty(node);
-		dojo.create('option', {innerHTML:"", value: null}, node);
+		dojo.create('option', {innerHTML:"Select a filter category first", value: null}, node);
 		dojo.forEach(ons.columns, function(n) {
 			if (n.category && n.category == category) {
 					dojo.create('option', {innerHTML:n.label, value: n.column}, node);
