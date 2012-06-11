@@ -94,7 +94,7 @@ input[type="submit"].searchsubmit {
 	border-top: 1px solid #404040 !important; 
 	border-left: 1px solid #404040 !important; 
 	border-right: 1px solid #404040 !important; 
-	border-bottom: 0;
+	border-bottom: 1px solid #404040;
 	margin: 20px auto 0 auto !important;
 	-moz-border-radius-topleft: 8px !important;
 	-moz-border-radius-topright: 8px !important;

@@ -1617,26 +1617,18 @@ ons.getFileId = function(column) {
 }
 
 
-ons.filterMap = function(layer, filter) {
-
-	var legend = dojo.byId("map_legend");
-	var legend_container = dojo.byId("legendcontainer");
+/**
+ * Returns a deferred containing the data for a specific filter
+ */
+ons.getFilterData = function(filter) {
+	var def = new dojo.Deferred();
 	var queryText = "SELECT '" + filter + "', 'Neighbourhood Name' FROM " + ons.getFileId(filter);
 	
 	queryText = encodeURIComponent(queryText);
 
 	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
-	var def = new dojo.Deferred();
-	if (filter && filter.length > 0) {
-	
-		var filterLabel = filter;
-		dojo.forEach(ons.columns, function(n) {
-			if (n.column == filter) {
-				filterLabel = n.label;
-			}
-		});
-	
-		query.send(function(response) {
+
+	query.send(function(response) {
 			if (!response || !response.getDataTable()) { 
 				if (console && console.error) { console.error(response, queryText); }
 				return;
@@ -1666,9 +1658,42 @@ ons.filterMap = function(layer, filter) {
 			var resolution = 5;
 			var add = diff/resolution;
 			
-			for(var name in values) {
+			def.callback(values);
+		});
+		
+	return def;
+}
 
+/**
+ * filters the map by highlighting 
+*/
+ons.filterMap = function(layer, filter) {
+
+	var legend = dojo.byId("map_legend");
+	var legend_container = dojo.byId("legendcontainer");
+	
+	if (filter && filter.length > 0) {
+	
+		var filterLabel = filter;
+		dojo.forEach(ons.columns, function(n) {
+			if (n.column == filter) {
+				filterLabel = n.label;
+			}
+		});
+	
+		ons.getFilterData(filter).then(function(values) {
+			var max = 0;
+			for (var name in values) {
+				var value = values[name];
+				if (value > max) { max = value; }
+			}
+			
+			for(var name in values) {
 				ons.findNeighbourhood(null, name).then(function(n) {
+					if (!n) {
+						if (console && console.error) { console.error("Couldn't find neighbourhood for name: \"" + name + "\""); }
+						return;
+					}
 					var value = values[name];
 					var h = 120; //green
 					var s = 100;
@@ -1680,8 +1705,8 @@ ons.filterMap = function(layer, filter) {
 							
 						poly._filter = {name: n['Neighbourhood Name'], filter: filterLabel, value: value};
 					});
+					
 				});
-
 			}
 			//set out our legend
 			if (legend) {
@@ -1746,30 +1771,59 @@ ons.updateFilter = function(nodeid, labelid, category) {
 	}
 }
 
+ons.showChartDialog = function() {
+	var catnode = dojo.byId('chart_category_select');
+	ons.populateCategorySelect(catnode);
+
+	var myDialog = new dijit.Dialog({
+        	title: "Compare Data",
+            	style: "width: 60%; height: 600px; background: white;"
+       	});
+
+	dojo.place(dojo.byId("chartDialog"), myDialog.domNode);
+	dojo.style(dojo.byId("chartDialog"), {display: ""});
+	myDialog.show();
+	if (dojo.byId('chart_div')) {
+		ons.showChart('chart_div');
+	}
+}
 
 /* 
- Shows a chart in the provided id
+ Shows a chart in the provided id, filtered by the 
 */
-ons.showChart = function(id) {
-	var axes = ['Neighbourhood Name', 'Population'];
-	var d = ons.getAllNeighbourhoods().then(function(neighbourhoods) {
-		//console.log(axes, neighbourhoods);
-		
-		var data = new google.visualization.DataTable();
-        	data.addColumn('string', axes[0]);
-	        data.addColumn('number', axes[1]);
-		dojo.forEach(neighbourhoods, function(n) {
-			data.addRow( [n[axes[0]], n[axes[1]] ] );
-		});
-
-        	var options = {
-       			title: axes[1],
+ons.showChart = function(id,filterSelect) {
+	if (!filterSelect) {
+		return;
+	}
+	
+	var filter = filterSelect.value;
+	var axes = ['Neighbourhood Name', filterSelect.options[filterSelect.selectedIndex].innerHTML];
+	var data = new google.visualization.DataTable();
+	
+	data.addColumn('string', axes[0]);
+	data.addColumn('number', axes[1]);
+	    
+	ons.getFilterData(filter).then(function(values) {
+		var options = {
+       		title: axes[1],
 			hAxis: {title: axes[0], titleTextStyle: {color: 'red'}}
 		};
-
-		var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+		for (var name in values) {
+			data.addRow([name, values[name]]);
+		}
+		
+		var chart = new google.visualization.ColumnChart(dojo.byId(id));
 		chart.draw(data, options);
 	});
+	
+	var d = ons.getAllNeighbourhoods().then(function(neighbourhoods) {
+		
+		dojo.forEach(neighbourhoods, function(n) {
+		//	data.addRow( [n[axes[0]], n[axes[1]] ] );
+		});
+	});
+	
+	
 }
 
 /* loading methods */
@@ -1783,7 +1837,72 @@ google.maps.Map.prototype.clearMarkers = function() {
     this.markers = new Array();
 };
 
-require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/DeferredList"], function(url, dom, ready, color, deferredlist){
+
+/**
+ * Populates a select tag with all of the available categories
+ */
+ons.populateCategorySelect = function(catnode) {
+	if (catnode) {
+		var created = {};
+		dojo.empty(catnode);
+		dojo.create('option', {innerHTML:"", value: null}, catnode);
+		dojo.forEach(ons.columns, function(n) {
+			if (n.category && ! created[n.category]) {
+				dojo.create('option', {innerHTML:n.category, value: n.category}, catnode);
+				created[n.category] = true;
+			}
+		});
+	};
+}
+
+/**
+ * Populates a select node with all of the neighbourhoods
+ */
+ons.populateNeighbourhoodSelect = function(node) {
+	if (node) {
+		var d = ons.getAllNeighbourhoods().then(function(neighbourhoods) {
+			dojo.empty(node);
+			//add an empty one
+			dojo.create('option', {innerHTML:"", value: null}, node);
+			dojo.forEach(neighbourhoods, function(n) {
+				dojo.create('option', {innerHTML:n["Neighbourhood Name"], value: n.ID}, node);
+			});
+		});
+	}
+}
+
+/**
+ * creates tabs if the tabs id exists
+ */
+ons.createTabs = function() {
+	if (!dojo.byId("tabs")) {
+		return;
+	}
+	
+   var tc = new dijit.layout.TabContainer({
+        style: "height: 100%; width: 100%;"
+    }, "tabs");
+
+    var cp1 = new dijit.layout.ContentPane({
+         title: "Maps",
+         content: ""
+    });
+    tc.addChild(cp1);
+
+    var cp2 = new dijit.layout.ContentPane({
+         title: "Compare",
+         content: ""
+    });
+    tc.addChild(cp2);
+
+    tc.startup();
+    dojo.style(dojo.byId("mapTab"), { display: ""});
+    dojo.style(dojo.byId("chartTab"), { display: ""});
+    dojo.place(dojo.byId("mapTab"), cp1.domNode);
+    dojo.place(dojo.byId("chartTab"), cp2.domNode);
+}
+
+require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/DeferredList", "dijit/Dialog", "dijit/layout/TabContainer", "dijit/layout/ContentPane"], function(url, dom, ready, color, deferredlist, Dialog, TextBox, Button){
          ready(function(){
 			if (typeof $j == "undefined") { $j = $; }
 			//set up our collapsible headers (faq page)
@@ -1803,37 +1922,16 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 					ons.showMap('map_canvas', id);
 				}
 
-				if (dojo.byId('chart_div')) {
-					ons.showChart('chart_div');
-				}
-
 				var catnode = dojo.byId('category_select');
-				if (catnode) {
-					var created = {};
-					dojo.empty(catnode);
-					dojo.create('option', {innerHTML:"", value: null}, catnode);
-					dojo.forEach(ons.columns, function(n) {
-							if (n.category && ! created[n.category]) {
-								dojo.create('option', {innerHTML:n.category, value: n.category}, catnode);
-								created[n.category] = true;
-							}
-					});
-				};
-				
+				ons.populateCategorySelect(catnode);
+
 				//if we have a 'neighbourhood_select', populate it with neighbourhoods
 				if (dojo.byId('neighbourhood_select')) {
 					var node = dojo.byId('neighbourhood_select');
-					if (node) {
-						dojo.empty(node);
-						//add an empty one
-						dojo.create('option', {innerHTML:"", value: null}, node);
-						dojo.forEach(neighbourhoods, function(n) {
-							dojo.create('option', {innerHTML:n["Neighbourhood Name"], value: n.ID}, node);
-						});
-					}
-					
-
+					ons.populateNeighbourhoodSelect(node);
 				}
+				
+				ons.createTabs();
 			});
 		});
 });
