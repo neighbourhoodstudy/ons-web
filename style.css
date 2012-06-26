@@ -456,3 +456,31 @@ div.suf-widget {
 	font-weight: bold;
 	margin: 0 !important;
 }
+
+/* charting page */
+#chartDialog {
+	padding: 0 10px 30px 10px;
+}
+
+#chart_message {
+	padding: 10px 0 0 0;
+}
+
+#chart_filter {
+ border-top: 1px solid #777;
+ padding: 10px;
+ margin: 10px;
+}
+
+#chart_filter .subfilter {
+ float: left; 
+ width: 50%;
+}
+
+#chart_filter .subfilter select {
+ width: 80%;
+}
+
+#chart_filter .subfilter select.multi {
+ height: 150px;
+}

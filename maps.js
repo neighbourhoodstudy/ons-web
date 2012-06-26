@@ -1771,6 +1771,7 @@ ons.updateFilter = function(nodeid, labelid, category) {
 	}
 }
 
+/*
 ons.showChartDialog = function() {
 	var catnode = dojo.byId('chart_category_select');
 	ons.populateCategorySelect(catnode);
@@ -1785,16 +1786,36 @@ ons.showChartDialog = function() {
 	myDialog.show();
 	if (dojo.byId('chart_div')) {
 		ons.showChart('chart_div');
-	}
+	} 
 }
+*/
 
 /* 
  Shows a chart in the provided id, filtered by the 
 */
 ons.showChart = function(id,filterSelect) {
-	if (!filterSelect) {
+
+	var chartDiv = dojo.byId("chart_div");
+	var filterDiv = dojo.byId("chart_filter");
+	var messageDiv = dojo.byId("chart_message");
+	var neighbourhoodsDiv = dojo.byId("chart_neighbourhoods");
+	var chartSort = dojo.byId("chart_sort");
+	
+	//in case it's an id
+	filterSelect = dojo.byId(filterSelect);
+	
+	if (!filterSelect || filterSelect.selectedIndex == 0) {
+		dojo.style(filterDiv, {display: "none"});
+		dojo.style(messageDiv, {display: ""});
+		dojo.style(neighbourhoodsDiv, {display: "none"});
+		dojo.style(chartDiv, {display: "none"});
 		return;
 	}
+
+	dojo.style(filterDiv, {display: ""});
+	dojo.style(messageDiv, {display: "none"});
+	dojo.style(neighbourhoodsDiv, {display: ""});
+	dojo.style(chartDiv, {display: ""});
 	
 	var filter = filterSelect.value;
 	var axes = ['Neighbourhood Name', filterSelect.options[filterSelect.selectedIndex].innerHTML];
@@ -1802,16 +1823,43 @@ ons.showChart = function(id,filterSelect) {
 	
 	data.addColumn('string', axes[0]);
 	data.addColumn('number', axes[1]);
-	    
+	
+	//find the selected neighbourhoods
+	var neighs = [];
+	for (var i=1;i<neighbourhoodsDiv.options.length;i++) {
+		if (neighbourhoodsDiv.options[i].selected) {
+        	neighs.push(neighbourhoodsDiv.options[i].innerHTML);
+    	}
+	}
+	
+	var sort = chartSort.selectedIndex > 0 ? chartSort.options[chartSort.selectedIndex] : null;
+	
 	ons.getFilterData(filter).then(function(values) {
+		
 		var options = {
        		title: axes[1],
-			hAxis: {title: axes[0], titleTextStyle: {color: 'red'}}
+			hAxis: {title: axes[0], titleTextStyle: {color: 'black', }}
 		};
+		
 		for (var name in values) {
-			data.addRow([name, values[name]]);
+			if (neighs.length > 0) {
+				if (dojo.indexOf(neighs, name) > -1) {
+					data.addRow([name, values[name]]);
+				}
+			} else {
+				data.addRow([name, values[name]]);
+			}
 		}
 		
+		//sort the data
+		if (chartSort.selectedIndex > 0){
+			if (chartSort.options[chartSort.selectedIndex].value == "asc") {
+				data.sort({column: 1, desc: false});
+			} else if (chartSort.options[chartSort.selectedIndex].value == "desc") {
+				data.sort({column: 1, desc: true});
+			}
+		}
+
 		var chart = new google.visualization.ColumnChart(dojo.byId(id));
 		chart.draw(data, options);
 	});
@@ -1895,6 +1943,13 @@ ons.createTabs = function() {
     });
     tc.addChild(cp2);
 
+	//update the chart
+	dojo.connect(tc, "selectChild", function(page){ 
+		if (page == cp2) {
+			ons.showChart('chart_div', 'filter_select');
+		}
+	});
+
     tc.startup();
     dojo.style(dojo.byId("mapTab"), { display: ""});
     dojo.style(dojo.byId("chartTab"), { display: ""});
@@ -1929,6 +1984,12 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 				if (dojo.byId('neighbourhood_select')) {
 					var node = dojo.byId('neighbourhood_select');
 					ons.populateNeighbourhoodSelect(node);
+				}
+
+
+				var neighbourhoodsDiv = dojo.byId("chart_neighbourhoods");
+				if (neighbourhoodsDiv) {
+					ons.populateNeighbourhoodSelect(neighbourhoodsDiv);
 				}
 				
 				ons.createTabs();
