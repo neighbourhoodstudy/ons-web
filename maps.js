@@ -1683,10 +1683,14 @@ ons.filterMap = function(layer, filter) {
 	
 		ons.getFilterData(filter).then(function(values) {
 			var max = 0;
+			var pos = 0;
+			var valArray = new Array(values.length);
 			for (var name in values) {
 				var value = values[name];
 				if (value > max) { max = value; }
+				valArray[pos++] = value;
 			}
+			valArray.sort(function(a,b){return a - b});
 			
 			for(var name in values) {
 				ons.findNeighbourhood(null, name).then(function(n) {
@@ -1695,10 +1699,20 @@ ons.filterMap = function(layer, filter) {
 						return;
 					}
 					var value = values[name];
+					var rank =0;
+					var centiles = 10;
+					for (i = 0; i < valArray.length; i++) {
+						if (value == valArray[i]) {
+							rank = i;
+							break;
+						}
+					};
+
 					var h = 120; //green
 					var s = 100;
-					var percent = value/max;
-					var l =  parseInt(100-(90*percent));
+					var centile = parseInt((rank/valArray.length) * centiles);
+					// add 3 to the centile to increase the descrimination
+					var l = parseInt ((centiles - (centile + 1)) * (centiles+3));	
 					var color = dojox.color.fromHsl(h, s, l);
 					dojo.forEach(n.polygons, function(poly) {
 						poly.setOptions({fillColor: color.toHex(), fillOpacity: .7});
