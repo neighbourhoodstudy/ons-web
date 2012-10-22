@@ -376,7 +376,8 @@ div.suf-widget {
 	float: left;
 }
 
-.mapcontainer .right {
+
+.mapcontainer #mainMapContainer.right {
 	width: 760px;
 	float: right;
 }
@@ -389,7 +390,7 @@ div.suf-widget {
 #legendcontainer {
 	position: relative;
 	width: 720px;
-	margin: 20px;
+	margin: 20px auto;
 	display: none;
 }
 
@@ -411,6 +412,7 @@ div.suf-widget {
 }
 
 #map_legend {
+	height: 25px;
 	width: 100%;
 	clear: both;
 	border: 1px solid #808080;
