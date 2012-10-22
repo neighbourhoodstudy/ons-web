@@ -43,10 +43,6 @@ ons.cache = {};
 ons.mapid = 2721445; //theirs
 //ons.mapid = 2641354; //mine
 
-//markers
-ons.markers = {};
-
-
 /**
  * Shows all the defined markers for a given object.  
  * @see ons.markers
