@@ -42,8 +42,19 @@ function ons_enqueue_scripts() {
 	wp_enqueue_script("ons-js-1", "http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dojo/dojo.js", array(), null);
 	wp_enqueue_script("ons-js-2", "http://www.google.com/jsapi", array(), null);
 	wp_enqueue_script("ons-js-3", "http://geoxml3.googlecode.com/svn/branches/polys/geoxml3.js", array(), null);
-	wp_enqueue_script("ons-js-4", "http://neighbourhoodstudy.ca/wp-content/themes/ons/onsdata.js", array(), null);
-	wp_enqueue_script("ons-js-5", "http://neighbourhoodstudy.ca/wp-content/themes/ons/onsmarkers.js", array(), null);
+	
+	//google maps
+	wp_enqueue_script("ons-js-4", "http://maps.googleapis.com/maps/api/js?key=AIzaSyD4Nh2-wpGCZL9kawcmhMsiARvN73XEqmY&sensor=true", array(), null);
+	
+	//jquery
+	wp_enqueue_script("ons-js-5", "http://neighbourhoodstudy.ca/wp-content/themes/ons/jquery-1.8.2.min.js", array(), null);
+	wp_enqueue_script("ons-js-6", "http://neighbourhoodstudy.ca/wp-content/themes/ons/jquery.collapsible.js", array(), null);
+	
+	//our custom js
+	wp_enqueue_script("ons-js-7", "http://neighbourhoodstudy.ca/wp-content/themes/ons/maps.js", array(), null);
+	wp_enqueue_script("ons-js-8", "http://neighbourhoodstudy.ca/wp-content/themes/ons/onsdata.js", array(), null);
+	wp_enqueue_script("ons-js-9", "http://neighbourhoodstudy.ca/wp-content/themes/ons/onsmarkers.js", array(), null);
+	
 }
 
 add_action('suffusion_page_header', 'ons_display_open_header');

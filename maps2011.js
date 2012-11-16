@@ -1,15 +1,15 @@
-// we need the ons map data.
+// we need the ons2011 map data.
 // we could include this with an amd module or something in the future
-if (!ons) {
-	//if (console && console.error) { console.error("Could not find ons map data"); }
-	var ons = {};
+if (!ons2011) {
+	//if (cons2011ole && cons2011ole.error) { cons2011ole.error("Could not find ons2011 map data"); }
+	var ons2011 = {};
 }
 
 /*
- * our default styles for polygons and lines (paths)
+ * our default styles for polygons2011 and lines (paths)
  */
-ons.defaultStyles = { 
-		polygonOptions : {
+ons2011.defaultStyles = { 
+		polygonOptions2011 : {
 			fillColor : "#319869",
 			fillOpacity :  0.5,
 			strokeColor : "#326D96",
@@ -18,27 +18,27 @@ ons.defaultStyles = {
 			strokeWeight: 1
 		},
 		
-		lineOptions: {
+		lineOptions2011: {
 			strokeColor : "#886D96",
 			strokeWeight: 5
 		}
 };
 
 
-//Name:	Age of Construction.csv
+//Name:	Age of Cons2011truction.csv
 //Numeric ID:	2730132
 
-ons.cache = {};
+ons2011.cache = {};
 
 //base map
-ons.mapid = 2721445; //theirs
-//ons.mapid = 2641354; //mine
+ons2011.mapid = 2721445; //theirs
+//ons2011.mapid = 2641354; //mine
 
 /**
  * Shows all the defined markers for a given object.  
- * @see ons.markers
+ * @see ons2011.markers
  */
-ons.showMarkers = function (obj, map, inputId) {
+ons2011.showMarkers = function (obj, map, inputId) {
 
 	var queryText = "SELECT name, geometry FROM " + obj.mapid;
 	queryText = encodeURIComponent(queryText);
@@ -72,23 +72,23 @@ ons.showMarkers = function (obj, map, inputId) {
 	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
 	var def = new dojo.Deferred();
 	
-	query.send(function(response) {
-		if (!response || !response.getDataTable()) { 
-			if (console && console.error) { console.error(response, queryText); }
+	query.send(function(respons2011e) {
+		if (!respons2011e || !respons2011e.getDataTable()) { 
+			if (cons2011ole && cons2011ole.error) { cons2011ole.error(respons2011e, queryText); }
 			return;
 		}
-		var numRows = response.getDataTable().getNumberOfRows();
+		var numRows = respons2011e.getDataTable().getNumberOfRows();
 
 		//create the list of lat/long coordinates
 		var coordinates = [];
 		for (var i=0;i<numRows;i++) {
-			var name = response.getDataTable().getValue(i, 0);
-			var geometry = response.getDataTable().getValue(i, 1);
-			value = ons.parseKml(map,geometry);
+			var name = respons2011e.getDataTable().getValue(i, 0);
+			var geometry = respons2011e.getDataTable().getValue(i, 1);
+			value = ons2011.parseKml(map,geometry);
 			
 			try {
 				if (value.marker) {
-					value.marker.setOptions({
+					value.marker.setOptions2011({
 						animation: google.maps.Animation.DROP,
 						icon: "/wp-content/uploads/2012/01/" + obj.icon,
 						title: name,
@@ -101,18 +101,18 @@ ons.showMarkers = function (obj, map, inputId) {
 				
 				if (value.polylines) {
 					dojo.forEach(value.polylines, function(p) {
-						p.setOptions({
+						p.setOptions2011({
 							title: name,
 							map: map,
-							strokeWeight: ons.defaultStyles.lineOptions.strokeWeight,
-							strokeColor: ons.defaultStyles.lineOptions.strokeColor
+							strokeWeight: ons2011.defaultStyles.lineOptions2011.strokeWeight,
+							strokeColor: ons2011.defaultStyles.lineOptions2011.strokeColor
 						});
 						obj.markers.push(p);
 					});
 				}
 
 			} catch (e) {
-				console.error(e);
+				cons2011ole.error(e);
 			}
 		}
 	});
@@ -122,8 +122,8 @@ ons.showMarkers = function (obj, map, inputId) {
  * Finds a locally cached neighbourhood by either name or id
  * @return a Deferred object that will contain null or the neighbourhood
  */
-ons.findNeighbourhood = function(id, name) {
-	var ret = ons.getAllNeighbourhoods();
+ons2011.findNeighbourhood = function(id, name) {
+	var ret = ons2011.getAllNeighbourhoods();
 	
 	ret.addCallback(function(arr) {
 		var r = null;
@@ -148,28 +148,28 @@ ons.findNeighbourhood = function(id, name) {
  * @param the id of the neighbourhood to center on
  * @return a deferred that will be fired when the map has been loaded and will return all of the lat/long
  */
-ons.fitMap = function(map, id) {
+ons2011.fitMap = function(map, id) {
 	
-	var queryText = "SELECT geometry FROM " + ons.mapid;
+	var queryText = "SELECT geometry FROM " + ons2011.mapid;
 	if (id) { queryText += " WHERE ID = " + id; }
 	queryText = encodeURIComponent(queryText);
 
 	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
 	var def = new dojo.Deferred();
 	
-	query.send(function(response) {
-		if (!response || !response.getDataTable()) { 
-			if (console && console.error) { console.error(response, queryText); }
+	query.send(function(respons2011e) {
+		if (!respons2011e || !respons2011e.getDataTable()) { 
+			if (cons2011ole && cons2011ole.error) { cons2011ole.error(respons2011e, queryText); }
 			return;
 		}
 		
-		var numRows = response.getDataTable().getNumberOfRows();
+		var numRows = respons2011e.getDataTable().getNumberOfRows();
 
 		//create the list of lat/long coordinates
 		var coordinates = [];
 		for(i = 0; i < numRows; i++) {
-			var geometry = response.getDataTable().getValue(i, 0);
-			value = ons.parseKml(ons._currentMap,geometry);
+			var geometry = respons2011e.getDataTable().getValue(i, 0);
+			value = ons2011.parseKml(ons2011._currentMap,geometry);
 			dojo.forEach(value.latLngs.getArray(), function(l) {
 				try {
 					coordinates = coordinates.concat(l.getArray());
@@ -189,18 +189,18 @@ ons.fitMap = function(map, id) {
 	});
 	
 	//reset all of the neighbourhoods fill color
-	ons.getAllNeighbourhoods().then(function(arr) {
+	ons2011.getAllNeighbourhoods().then(function(arr) {
 	
 		dojo.forEach(arr, function(n) {
-			var color = ons.defaultStyles.polygonOptions.fillColor;
+			var color = ons2011.defaultStyles.polygonOptions2011.fillColor;
 			
 			if (parseInt(n.ID) === parseInt(id)) {
-				color = ons.defaultStyles.polygonOptions.highlightFillcolor;
+				color = ons2011.defaultStyles.polygonOptions2011.highlightFillcolor;
 			}
 			
-			if (n.polygons) {
-				dojo.forEach(n.polygons, function(p) {
-					p.setOptions({fillColor: color});
+			if (n.polygons2011) {
+				dojo.forEach(n.polygons2011, function(p) {
+					p.setOptions2011({fillColor: color});
 				});
 			}
 		});
@@ -215,7 +215,7 @@ ons.fitMap = function(map, id) {
  * this uses http://geoxml3.googlecode.com/svn/branches/polys/geoxml3.js
  * to parse the kml
  */
-ons.parseKml = function(map, kml) {
+ons2011.parseKml = function(map, kml) {
 
     // create a geoXml3 parser for the click handlers
 	var infoWindow = new google.maps.InfoWindow(); 
@@ -231,10 +231,10 @@ ons.parseKml = function(map, kml) {
 	geoXml.parseKmlString("<Placemark>"+kml+"</Placemark>");
     var ret = {};
 	if (geoXml.docs[0].placemarks[0].Polygon) {
-       geoXml.docs[0].gpolygons[0].setMap(null);
-       ret.position = geoXml.docs[0].gpolygons[0].bounds.getCenter();
-       ret.bounds = geoXml.docs[0].gpolygons[0].bounds;
-	   ret.latLngs = geoXml.docs[0].gpolygons[0].latLngs;
+       geoXml.docs[0].gpolygons2011[0].setMap(null);
+       ret.position = geoXml.docs[0].gpolygons2011[0].bounds.getCenter();
+       ret.bounds = geoXml.docs[0].gpolygons2011[0].bounds;
+	   ret.latLngs = geoXml.docs[0].gpolygons2011[0].latLngs;
     } else if (geoXml.docs[0].placemarks[0].LineString) {
        geoXml.docs[0].gpolylines[0].setMap(null);
        ret.position = geoXml.docs[0].gpolylines[0].bounds.getCenter();
@@ -252,16 +252,16 @@ ons.parseKml = function(map, kml) {
 * array of callbacks used by the deferred list to marshall the returning queries
 */
 
-ons.callbackObjects = new Array();
+ons2011.callbackObjects = new Array();
 
 /*
 * create the queries for all the tables used to populate the cache
 */
 
-ons.createQueries = function() {
+ons2011.createQueries = function() {
 	var cols = [];
-	dojo.forEach(ons.columns, function(col) {
-		var tableId  = (col.table ? col.table : ons.mapid) + "";
+	dojo.forEach(ons2011.columns, function(col) {
+		var tableId  = (col.table ? col.table : ons2011.mapid) + "";
 		if (cols[tableId] == null) {
 			cols[tableId] = new Array();
 		}
@@ -271,10 +271,9 @@ ons.createQueries = function() {
 	var queries = [];
 	for (var id in cols) {
 	
-		if (id != (ons.mapid + "")) {
+		if (id != (ons2011.mapid + "")) {
 			continue;
 		}
-
 	
 		var queryTextu = "SELECT " 
 			+ "'" + cols[id].join("','") + "'" 
@@ -283,8 +282,8 @@ ons.createQueries = function() {
 		queryText = encodeURIComponent(queryTextu);
 		queries.push( new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText));
 		var def = new dojo.Deferred();
-		ons.callbackObjects.length = ons.callbackObjects.length + 1;	
-		ons.callbackObjects[ons.callbackObjects.length-1] = def;
+		ons2011.callbackObjects.length = ons2011.callbackObjects.length + 1;	
+		ons2011.callbackObjects[ons2011.callbackObjects.length-1] = def;
 	}
 	return queries;
 }
@@ -295,42 +294,42 @@ ons.createQueries = function() {
  * queries our fusiontable for all of the neighbourhoods, and all of the data associated with it
  * @return a dojo.Deferred that will be called with a data object containing all the data
  */
-ons.getAllNeighbourhoods = function() {
+ons2011.getAllNeighbourhoods = function() {
 
 	var def = new dojo.Deferred();
 	
-	if (ons.cache["neighbourhoods"]) {
-		def.callback(ons.cache["neighbourhoods"]);
+	if (ons2011.cache["neighbourhoods"]) {
+		def.callback(ons2011.cache["neighbourhoods"]);
 		return def;
 	}
 	
 	var arr = [];
-	ons.cache["neighbourhoods"] = arr;
-	var queries = ons.createQueries();
+	ons2011.cache["neighbourhoods"] = arr;
+	var queries = ons2011.createQueries();
 	
-	var dlistObj = new dojo.DeferredList([ons.callbackObjects[0]]);
+	var dlistObj = new dojo.DeferredList([ons2011.callbackObjects[0]]);
 	dojo.forEach (queries, function(query) {
 
-		query.send(function(response) {
-			var def = ons.callbackObjects.pop();
-			def.callback(response);
+		query.send(function(respons2011e) {
+			var def = ons2011.callbackObjects.pop();
+			def.callback(respons2011e);
 		});
 	});
 	
 	dlistObj.then(function(retVal) {
 		
 		for(resps = 0; resps < retVal.length; resps++) {
-			var response = retVal[resps][1];
+			var respons2011e = retVal[resps][1];
 
-			if (!response || !response.getDataTable()) { 
-				if (console && console.error) { console.error(response, "", ""); }
+			if (!respons2011e || !respons2011e.getDataTable()) { 
+				if (cons2011ole && cons2011ole.error) { cons2011ole.error(respons2011e, "", ""); }
 				continue;
 			}
 	
-			var numRows = response.getDataTable().getNumberOfRows();
-			var numCols = response.getDataTable().getNumberOfColumns();
+			var numRows = respons2011e.getDataTable().getNumberOfRows();
+			var numCols = respons2011e.getDataTable().getNumberOfColumns();
 			var startCol = 0;
-			dojo.forEach (ons.dataTables, function(dataTable) {
+			dojo.forEach (ons2011.dataTables, function(dataTable) {
 				if (numCols == dataTable.noColumns) {
 					startCol = dataTable.startColumn;
 				}
@@ -339,18 +338,18 @@ ons.getAllNeighbourhoods = function() {
 			for(i = 0; i < numRows; i++) {
 				var retObj = {};
 				for(j = 0; j < numCols; j++) {
-					var value = response.getDataTable().getValue(i, j);
+					var value = respons2011e.getDataTable().getValue(i, j);
 					var pos = j + startCol;
-					var key = ons.columns[pos].column ? ons.columns[pos].column : ons.columns[pos].label;
+					var key = ons2011.columns[pos].column ? ons2011.columns[pos].column : ons2011.columns[pos].label;
 					if (key == "geometry") {
-						value = ons.parseKml(ons._currentMap,value);
+						value = ons2011.parseKml(ons2011._currentMap,value);
 					}
 					retObj[key] = value;
 				}
-				ons.cache["neighbourhoods"].push(retObj);
+				ons2011.cache["neighbourhoods"].push(retObj);
 			} 
 		}
-		def.callback(ons.cache["neighbourhoods"]);
+		def.callback(ons2011.cache["neighbourhoods"]);
 	});
 
 
@@ -360,66 +359,66 @@ ons.getAllNeighbourhoods = function() {
 /**
  * Makes a polygon for the given coordinates and the map
   * @param arrCoords, an array of google.maps.LatLng objects
-  * @param onsmap, a google map object
+  * @param ons2011map, a google map object
  */
-ons.makePoly = function(arrCoords, onsmap, neigh) {
+ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 	
 	var poly = new google.maps.Polygon({
 		path: arrCoords,
-		fillColor: ons.defaultStyles.polygonOptions.fillColor,
-		fillOpacity: ons.defaultStyles.polygonOptions.fillOpacity,
-		strokeColor: ons.defaultStyles.polygonOptions.strokeColor,
-		strokeOpacity: ons.defaultStyles.polygonOptions.strokeOpacity,
-		strokeWeight: ons.defaultStyles.polygonOptions.strokeWeight
+		fillColor: ons2011.defaultStyles.polygonOptions2011.fillColor,
+		fillOpacity: ons2011.defaultStyles.polygonOptions2011.fillOpacity,
+		strokeColor: ons2011.defaultStyles.polygonOptions2011.strokeColor,
+		strokeOpacity: ons2011.defaultStyles.polygonOptions2011.strokeOpacity,
+		strokeWeight: ons2011.defaultStyles.polygonOptions2011.strokeWeight
 	  });
 	
-	var n = dojo.byId("onsTooltip");
+	var n = dojo.byId("ons2011Tooltip");
 
 	if (!n) {
-		n = dojo.create("div", { id: "onsTooltip", className:"tooltip" }, dojo.body());
+		n = dojo.create("div", { id: "ons2011Tooltip", className:"tooltip" }, dojo.body());
 	} 
 		
-	if (!ons.docc) {
-		ons.docc = dojo.connect(dojo.doc, "onmousemove", function(event) { 
+	if (!ons2011.docc) {
+		ons2011.docc = dojo.connect(dojo.doc, "onmousemove", function(event) { 
 			var t = dojo.isIe ? event.clientY + dojo.doc.scrollTop : event.pageY;
 			var l = dojo.isIe ? event.clientX + dojo.doc.scrollLeft : event.pageX;
-			ons.docc._w = {t:t-40, l:l+20};
+			ons2011.docc._w = {t:t-40, l:l+20};
 		});
 	}
 		
 	google.maps.event.addListener(poly, 'mouseover', function() {  
 		this.origOpac = this.fillOpacity;
-		dojo.forEach(neigh.polygons, function(poly) {
+		dojo.forEach(neigh.polygons2011, function(poly) {
 			poly.origOpac = poly.fillOpacity;
-			poly.setOptions({fillOpacity: poly.fillOpacity+.2}); 
+			poly.setOptions2011({fillOpacity: poly.fillOpacity+.2}); 
 		});
 		
-		clearTimeout(ons.timeout2);
-		clearTimeout(ons.timeout3);
+		clearTimeout(ons2011.timeout2);
+		clearTimeout(ons2011.timeout3);
 		var poly = this;
 		
-		ons.timeout1 = setTimeout(function() {
+		ons2011.timeout1 = setTimeout(function() {
 			dojo.style(n, { display: "block" });
-			dojo.style(n, {top:ons.docc._w.t+"px", left:ons.docc._w.l+"px"});
+			dojo.style(n, {top:ons2011.docc._w.t+"px", left:ons2011.docc._w.l+"px"});
 			if (poly._filter) {
 				n.innerHTML = "<div class='ttname'>"+ poly._filter.name + "</div><div><span>" + poly._filter.filter + ": </span><span class='ttlabel'>" + poly._filter.value +"</span></div>";
 			} else {			
 				n.innerHTML = neigh['Neighbourhood Name'];
 			}
 			
-			ons.timeout3 = setTimeout(function() {
+			ons2011.timeout3 = setTimeout(function() {
 				dojo.style(n, { display: "none" });
 			},2000);
 		},200);
 	});
 	
 	google.maps.event.addListener(poly, 'mouseout', function() { 
-		dojo.forEach(neigh.polygons, function(poly) {
-			poly.setOptions({fillOpacity: poly.origOpac}); 
+		dojo.forEach(neigh.polygons2011, function(poly) {
+			poly.setOptions2011({fillOpacity: poly.origOpac}); 
 		});
-		clearTimeout(ons.timeout1);
-		clearTimeout(ons.timeout3);	
-		ons.timeout2 = setTimeout(function() {
+		clearTimeout(ons2011.timeout1);
+		clearTimeout(ons2011.timeout3);	
+		ons2011.timeout2 = setTimeout(function() {
 			dojo.style(n, { display: "none" });
 		},200);
 	});
@@ -446,8 +445,8 @@ ons.makePoly = function(arrCoords, onsmap, neigh) {
 		}
 	});
 	
-	poly.setMap(onsmap);
-	poly._onsmap = onsmap;
+	poly.setMap(ons2011map);
+	poly._ons2011map = ons2011map;
 		
 	return poly;
 }
@@ -455,22 +454,22 @@ ons.makePoly = function(arrCoords, onsmap, neigh) {
 /** 
  *  Displays a map  
  * @param mapnodeid the id of the dom node in which to draw the map
- * @param id (optional), if supplied, only show the polygons for the provided id or ids (an array is accepted). If
- *          null, don't show any polygons
+ * @param id (optional), if supplied, only show the polygons2011 for the provided id or ids (an array is accepted). If
+ *          null, don't show any polygons2011
  */
-ons.showMap = function(mapnodeid, id) {
+ons2011.showMap = function(mapnodeid, id) {
 
-	var gmap = new google.maps.Map(document.getElementById(mapnodeid), ons.goptions);
+	var gmap = new google.maps.Map(document.getElementById(mapnodeid), ons2011.goptions2011);
 	
 	var query = {
 		select: 'geometry',
-		from: ons.mapid
+		from: ons2011.mapid
 		//where: "'Neighbourhood Name' = 'Greenbelt'"
 	};
 	
 	if (typeof id == 'undefined') {
 		//all
-		/*dojo.forEach(ons.maps, function(map) {
+		/*dojo.forEach(ons2011.maps, function(map) {
 			var arrCoords = [];
 			dojo.forEach(map.poly, function(poly) {
 				var ll = new google.maps.LatLng(poly[1],poly[0]);
@@ -482,9 +481,9 @@ ons.showMap = function(mapnodeid, id) {
 	}
 
 	//make polys
-	ons.getAllNeighbourhoods().then(function(arr) {
+	ons2011.getAllNeighbourhoods().then(function(arr) {
 		var layer = new google.maps.FusionTablesLayer({ query: query/*, styles: styles*/ });
-		ons._onsLayer = layer;
+		ons2011._ons2011Layer = layer;
 		
 		//create a poly for each neighbourhood
 		dojo.forEach(arr, function(neigh, index) {
@@ -492,19 +491,19 @@ ons.showMap = function(mapnodeid, id) {
 						
 			//we have to do this because there's a bug in google maps (maybe) where it won't draw this correctly
 			var bs = geometry.latLngs.b.concat();
-			neigh.polygons = [];
+			neigh.polygons2011 = [];
 			dojo.forEach(bs, function(b) {
 				geometry.latLngs.b = [b];
-				neigh.polygons.push(ons.makePoly(geometry.latLngs, gmap, neigh));
+				neigh.polygons2011.push(ons2011.makePoly(geometry.latLngs, gmap, neigh));
 			});
 		});
 		
-		ons.fitMap(gmap, id);
+		ons2011.fitMap(gmap, id);
 		
 	});
 	
 	//store these globally
-	ons._currentMap = gmap;
+	ons2011._currentMap = gmap;
 	
 	//return {map: gmap, layers: [layer]};
 }
@@ -515,14 +514,14 @@ ons.showMap = function(mapnodeid, id) {
 * @param - column
 */
 
-ons.getFileId = function(column) {
+ons2011.getFileId = function(column) {
 	if (column == null) {
-		return ons.mapid;
+		return ons2011.mapid;
 	}
-	var fileId = ons.mapid;
-	dojo.forEach(ons.columns, function(col) {
+	var fileId = ons2011.mapid;
+	dojo.forEach(ons2011.columns, function(col) {
 		if (col.column == column) {
-			fileId = col.table ? col.table : ons.mapid;
+			fileId = col.table ? col.table : ons2011.mapid;
 		}
 	});
 	return fileId;
@@ -532,21 +531,21 @@ ons.getFileId = function(column) {
 /**
  * Returns a deferred containing the data for a specific filter
  */
-ons.getFilterData = function(filter) {
+ons2011.getFilterData = function(filter) {
 	var def = new dojo.Deferred();
-	var queryText = "SELECT '" + filter + "', 'Neighbourhood Name' FROM " + ons.getFileId(filter);
+	var queryText = "SELECT '" + filter + "', 'Neighbourhood Name' FROM " + ons2011.getFileId(filter);
 	
 	queryText = encodeURIComponent(queryText);
 
 	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
 
-	query.send(function(response) {
-			if (!response || !response.getDataTable()) { 
-				if (console && console.error) { console.error(response, queryText); }
+	query.send(function(respons2011e) {
+			if (!respons2011e || !respons2011e.getDataTable()) { 
+				if (cons2011ole && cons2011ole.error) { cons2011ole.error(respons2011e, queryText); }
 				return;
 			}
 			
-			var numRows = response.getDataTable().getNumberOfRows();
+			var numRows = respons2011e.getDataTable().getNumberOfRows();
 
 			//create the list of lat/long coordinates
 			var coordinates = [];
@@ -554,8 +553,8 @@ ons.getFilterData = function(filter) {
 			var max = 0;
 			var values = {};
 			for(i = 0; i < numRows; i++) {
-				var name = response.getDataTable().getValue(i, 1);
-				var value = response.getDataTable().getValue(i, 0);
+				var name = respons2011e.getDataTable().getValue(i, 1);
+				var value = respons2011e.getDataTable().getValue(i, 0);
 				
 				try {
 					value = parseFloat(parseFloat(value).toFixed(2));
@@ -579,7 +578,7 @@ ons.getFilterData = function(filter) {
 /**
  * filters the map by highlighting 
 */
-ons.filterMap = function(layer, filter) {
+ons2011.filterMap = function(layer, filter) {
 
 	var legend = dojo.byId("map_legend");
 	var legend_container = dojo.byId("legendcontainer");
@@ -587,13 +586,13 @@ ons.filterMap = function(layer, filter) {
 	if (filter && filter.length > 0) {
 	
 		var filterLabel = filter;
-		dojo.forEach(ons.columns, function(n) {
+		dojo.forEach(ons2011.columns, function(n) {
 			if (n.column == filter) {
 				filterLabel = n.label;
 			}
 		});
 	
-		ons.getFilterData(filter).then(function(values) {
+		ons2011.getFilterData(filter).then(function(values) {
 			var max = 0;
 			var pos = 0;
 			var valArray = new Array(values.length);
@@ -605,9 +604,9 @@ ons.filterMap = function(layer, filter) {
 			valArray.sort(function(a,b){return a - b});
 			
 			for(var name in values) {
-				ons.findNeighbourhood(null, name).then(function(n) {
+				ons2011.findNeighbourhood(null, name).then(function(n) {
 					if (!n) {
-						if (console && console.error) { console.error("Couldn't find neighbourhood for name: \"" + name + "\""); }
+						if (cons2011ole && cons2011ole.error) { cons2011ole.error("Couldn't find neighbourhood for name: \"" + name + "\""); }
 						return;
 					}
 					var value = values[name];
@@ -626,8 +625,8 @@ ons.filterMap = function(layer, filter) {
 					// add 3 to the centile to increase the descrimination
 					var l = parseInt ((centiles - (centile + 1)) * (centiles+3));	
 					var color = dojox.color.fromHsl(h, s, l);
-					dojo.forEach(n.polygons, function(poly) {
-						poly.setOptions({fillColor: color.toHex(), fillOpacity: .7});
+					dojo.forEach(n.polygons2011, function(poly) {
+						poly.setOptions2011({fillColor: color.toHex(), fillOpacity: .7});
 							
 						poly._filter = {name: n['Neighbourhood Name'], filter: filterLabel, value: value};
 					});
@@ -654,11 +653,11 @@ ons.filterMap = function(layer, filter) {
 			dojo.style(legend_container, 'display', 'none');
 		}
 		
-		//reset all of our polygons
-		ons.getAllNeighbourhoods().then(function(arr) {
+		//reset all of our polygons2011
+		ons2011.getAllNeighbourhoods().then(function(arr) {
 			dojo.forEach(arr, function(n) {
-				dojo.forEach(n.polygons, function(poly) {
-					poly.setOptions({fillColor: ons.defaultStyles.polygonOptions.fillColor, fillOpacity: ons.defaultStyles.polygonOptions.fillOpacity});
+				dojo.forEach(n.polygons2011, function(poly) {
+					poly.setOptions2011({fillColor: ons2011.defaultStyles.polygonOptions2011.fillColor, fillOpacity: ons2011.defaultStyles.polygonOptions2011.fillOpacity});
 					poly._filter = null;
 				});
 			});
@@ -672,7 +671,7 @@ ons.filterMap = function(layer, filter) {
  * @param labelid the id of a label to remove the 'disabled' css class from
  * @param category the new category
  */
-ons.updateFilter = function(nodeid, labelid, category) {
+ons2011.updateFilter = function(nodeid, labelid, category) {
 	var node = dojo.byId(nodeid);
 	var label = dojo.byId(labelid);
 	
@@ -680,7 +679,7 @@ ons.updateFilter = function(nodeid, labelid, category) {
 		dojo.attr(node, 'disabled', false);
 		dojo.empty(node);
 		dojo.create('option', {innerHTML:"", value: null}, node);
-		dojo.forEach(ons.columns, function(n) {
+		dojo.forEach(ons2011.columns, function(n) {
 			if (n.category && n.category == category) {
 					dojo.create('option', {innerHTML:n.label, value: n.column}, node);
 			}
@@ -689,18 +688,18 @@ ons.updateFilter = function(nodeid, labelid, category) {
 	
 	if (category) {
 		if (label) dojo.removeClass(label, 'disabled');
-		ons.filterMap(ons._onsLayer, null);
+		ons2011.filterMap(ons2011._ons2011Layer, null);
 	} else {
 		dojo.attr(node, 'disabled', true);
 		if (label) dojo.addClass(label, 'disabled');
-		ons.filterMap(ons._onsLayer, null);
+		ons2011.filterMap(ons2011._ons2011Layer, null);
 	}
 }
 
 /*
-ons.showChartDialog = function() {
+ons2011.showChartDialog = function() {
 	var catnode = dojo.byId('chart_category_select');
-	ons.populateCategorySelect(catnode);
+	ons2011.populateCategorySelect(catnode);
 
 	var myDialog = new dijit.Dialog({
         	title: "Compare Data",
@@ -711,7 +710,7 @@ ons.showChartDialog = function() {
 	dojo.style(dojo.byId("chartDialog"), {display: ""});
 	myDialog.show();
 	if (dojo.byId('chart_div')) {
-		ons.showChart('chart_div');
+		ons2011.showChart('chart_div');
 	} 
 }
 */
@@ -719,7 +718,7 @@ ons.showChartDialog = function() {
 /* 
  Shows a chart in the provided id, filtered by the 
 */
-ons.showChart = function(id,filterSelect) {
+ons2011.showChart = function(id,filterSelect) {
 
 	var chartDiv = dojo.byId("chart_div");
 	var filterDiv = dojo.byId("chart_filter");
@@ -744,7 +743,7 @@ ons.showChart = function(id,filterSelect) {
 	dojo.style(chartDiv, {display: ""});
 	
 	var filter = filterSelect.value;
-	var axes = ['Neighbourhood Name', filterSelect.options[filterSelect.selectedIndex].innerHTML];
+	var axes = ['Neighbourhood Name', filterSelect.options2011[filterSelect.selectedIndex].innerHTML];
 	var data = new google.visualization.DataTable();
 	
 	data.addColumn('string', axes[0]);
@@ -752,17 +751,17 @@ ons.showChart = function(id,filterSelect) {
 	
 	//find the selected neighbourhoods
 	var neighs = [];
-	for (var i=1;i<neighbourhoodsDiv.options.length;i++) {
-		if (neighbourhoodsDiv.options[i].selected) {
-        	neighs.push(neighbourhoodsDiv.options[i].innerHTML);
+	for (var i=1;i<neighbourhoodsDiv.options2011.length;i++) {
+		if (neighbourhoodsDiv.options2011[i].selected) {
+        	neighs.push(neighbourhoodsDiv.options2011[i].innerHTML);
     	}
 	}
 	
-	var sort = chartSort.selectedIndex > 0 ? chartSort.options[chartSort.selectedIndex] : null;
+	var sort = chartSort.selectedIndex > 0 ? chartSort.options2011[chartSort.selectedIndex] : null;
 	
-	ons.getFilterData(filter).then(function(values) {
+	ons2011.getFilterData(filter).then(function(values) {
 		
-		var options = {
+		var options2011 = {
        		title: axes[1],
 			hAxis: {title: axes[0], titleTextStyle: {color: 'black', }}
 		};
@@ -779,18 +778,18 @@ ons.showChart = function(id,filterSelect) {
 		
 		//sort the data
 		if (chartSort.selectedIndex > 0){
-			if (chartSort.options[chartSort.selectedIndex].value == "asc") {
+			if (chartSort.options2011[chartSort.selectedIndex].value == "asc") {
 				data.sort({column: 1, desc: false});
-			} else if (chartSort.options[chartSort.selectedIndex].value == "desc") {
+			} else if (chartSort.options2011[chartSort.selectedIndex].value == "desc") {
 				data.sort({column: 1, desc: true});
 			}
 		}
 
 		var chart = new google.visualization.ColumnChart(dojo.byId(id));
-		chart.draw(data, options);
+		chart.draw(data, options2011);
 	});
 	
-	var d = ons.getAllNeighbourhoods().then(function(neighbourhoods) {
+	var d = ons2011.getAllNeighbourhoods().then(function(neighbourhoods) {
 		
 		dojo.forEach(neighbourhoods, function(n) {
 		//	data.addRow( [n[axes[0]], n[axes[1]] ] );
@@ -815,12 +814,12 @@ google.maps.Map.prototype.clearMarkers = function() {
 /**
  * Populates a select tag with all of the available categories
  */
-ons.populateCategorySelect = function(catnode) {
+ons2011.populateCategorySelect = function(catnode) {
 	if (catnode) {
 		var created = {};
 		dojo.empty(catnode);
 		dojo.create('option', {innerHTML:"", value: null}, catnode);
-		dojo.forEach(ons.columns, function(n) {
+		dojo.forEach(ons2011.columns, function(n) {
 			if (n.category && ! created[n.category]) {
 				dojo.create('option', {innerHTML:n.category, value: n.category}, catnode);
 				created[n.category] = true;
@@ -832,9 +831,9 @@ ons.populateCategorySelect = function(catnode) {
 /**
  * Populates a select node with all of the neighbourhoods
  */
-ons.populateNeighbourhoodSelect = function(node) {
+ons2011.populateNeighbourhoodSelect = function(node) {
 	if (node) {
-		var d = ons.getAllNeighbourhoods().then(function(neighbourhoods) {
+		var d = ons2011.getAllNeighbourhoods().then(function(neighbourhoods) {
 			dojo.empty(node);
 			//add an empty one
 			dojo.create('option', {innerHTML:"", value: null}, node);
@@ -848,7 +847,7 @@ ons.populateNeighbourhoodSelect = function(node) {
 /**
  * creates tabs if the tabs id exists
  */
-ons.createTabs = function() {
+ons2011.createTabs = function() {
 	if (!dojo.byId("tabs")) {
 		return;
 	}
@@ -872,7 +871,7 @@ ons.createTabs = function() {
 	//update the chart
 	dojo.connect(tc, "selectChild", function(page){ 
 		if (page == cp2) {
-			ons.showChart('chart_div', 'filter_select');
+			ons2011.showChart('chart_div', 'filter_select');
 		}
 	});
 
@@ -891,7 +890,7 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 			//$j.collapsible('.collapsible .header')
 
 			//first thing we do is load all our neighbourhoods so we can cache them
-			var d = ons.getAllNeighbourhoods().then(function(neighbourhoods) {
+			var d = ons2011.getAllNeighbourhoods().then(function(neighbourhoods) {
 				//if we have a 'map_canvas', show a map in it
 				if (dojo.byId('map_canvas')) {
 					var id = undefined;
@@ -901,25 +900,25 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 						id = q.page_id ? q.page_id: id;
 						if (id == 129) { id = undefined; } //the maps page
 					}
-					ons.showMap('map_canvas', id);
+					ons2011.showMap('map_canvas', id);
 				}
 
 				var catnode = dojo.byId('category_select');
-				ons.populateCategorySelect(catnode);
+				ons2011.populateCategorySelect(catnode);
 
 				//if we have a 'neighbourhood_select', populate it with neighbourhoods
 				if (dojo.byId('neighbourhood_select')) {
 					var node = dojo.byId('neighbourhood_select');
-					ons.populateNeighbourhoodSelect(node);
+					ons2011.populateNeighbourhoodSelect(node);
 				}
 
 
 				var neighbourhoodsDiv = dojo.byId("chart_neighbourhoods");
 				if (neighbourhoodsDiv) {
-					ons.populateNeighbourhoodSelect(neighbourhoodsDiv);
+					ons2011.populateNeighbourhoodSelect(neighbourhoodsDiv);
 				}
 				
-				ons.createTabs();
+				ons2011.createTabs();
 			});
 		});
 });

@@ -3,6 +3,15 @@ if (!ons) {
 	var ons = {};
 }
 
+/*
+ * default options for our map
+ */
+ons.goptions= {
+	center: new google.maps.LatLng(45.25, -75.80),
+	zoom: 9,
+	mapTypeId: google.maps.MapTypeId.ROADMAP
+}
+
 //if you change the fusion tables, MAKE SURE you change the columns below
 ons.dataTables = [{
 	noColumns: 79,
