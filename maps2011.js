@@ -36,99 +36,8 @@ ons2011.goptions= {
 	mapTypeId: google.maps.MapTypeId.ROADMAP
 }
 
-
-//Name:	Age of Cons2011truction.csv
-//Numeric ID:	2730132
-
 ons2011.cache = {};
 
-//base map
-ons2011.mapid = 2721445; //theirs
-//ons2011.mapid = 2641354; //mine
-
-/**
- * Shows all the defined markers for a given object.  
- * @see ons2011.markers
- */
-ons2011.showMarkers = function (obj, map, inputId) {
-
-	var queryText = "SELECT name, geometry FROM " + obj.mapid;
-	queryText = encodeURIComponent(queryText);
-
-	if (dojo.byId(inputId).checked) {
-		if (obj.markers != null) {
-			dojo.forEach(obj.markers, function(marker) {
-				marker.setMap(map);
-			});
-			return;
-		}
-		
-		if (obj.markers != null) {
-			dojo.forEach(obj.markers, function(marker) {
-				marker.setMap(map);
-			});
-			return;
-		}
-		
-		//else just set up a new markers
-		obj.markers = [];
-	} else {
-		if (obj.markers) {
-			dojo.forEach(obj.markers, function(marker) {
-				marker.setMap(null);
-			});
-			return;
-		}
-	}
-
-	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
-	var def = new dojo.Deferred();
-	
-	query.send(function(response) {
-		if (!response || !response.getDataTable()) { 
-			if (console && console.error) { console.error(response, queryText); }
-			return;
-		}
-		var numRows = response.getDataTable().getNumberOfRows();
-
-		//create the list of lat/long coordinates
-		var coordinates = [];
-		for (var i=0;i<numRows;i++) {
-			var name = response.getDataTable().getValue(i, 0);
-			var geometry = response.getDataTable().getValue(i, 1);
-			value = ons2011.parseKml(map,geometry);
-			
-			try {
-				if (value.marker) {
-					value.marker.setOptions({
-						animation: google.maps.Animation.DROP,
-						icon: "/wp-content/uploads/2012/01/" + obj.icon,
-						title: name,
-						map: map
-					});
-					
-					obj.markers.push(value.marker);
-					google.maps.event.addListener(value.marker, 'click', function() { return false; });
-				} 
-				
-				if (value.polylines) {
-					dojo.forEach(value.polylines, function(p) {
-						p.setOptions({
-							title: name,
-							map: map,
-							strokeWeight: ons2011.defaultStyles.lineOptions2011.strokeWeight,
-							strokeColor: ons2011.defaultStyles.lineOptions2011.strokeColor
-						});
-						obj.markers.push(p);
-					});
-				}
-
-			} catch (e) {
-				console.error(e);
-			}
-		}
-	});
-}
 
 /**
  * Finds a locally cached neighbourhood by either name or id
@@ -197,7 +106,6 @@ ons2011.fitMap = function(map, id) {
  * to parse the kml
  */
 ons2011.createGeometry = function(map, geo) {
-
 	var ret = {};
 	if (dojo.isObject(geo)) {
 		var bounds = new google.maps.LatLngBounds();
@@ -222,8 +130,9 @@ ons2011.createGeometry = function(map, geo) {
 			  var ll = new google.maps.LatLng(vals[1], vals[0]);
 			  ltlLngs.push(ll);
 			  bounds.extend(ll);
-				
 			}
+		} else if (geo.geometry && geo.geometry.type == "Point") {
+			ltlLngs = new google.maps.LatLng(geo.geometry.coordinates[1], geo.geometry.coordinates[0]);
 		}
 			
 		ret.position = bounds.getCenter();
@@ -271,7 +180,7 @@ ons2011.loadData = function () {
 	
 	gapi.client.load('fusiontables', 'v1', function(){
 	  var retData = {};
-	  
+
 	  //Load our layer/categories table
 	  var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select Category,Layer,'Polygon Attributes','Attribute Description','Data Table ID','Points of Interest Table ID','Polygon Layer','Point Layer','Choropleth','Proportional Circle' from " + ons2011.layersId});
       request.execute(function(data){
@@ -410,8 +319,16 @@ ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 		ons2011.timeout1 = setTimeout(function() {
 			dojo.style(n, { display: "block" });
 			dojo.style(n, {top:ons2011.docc._w.t+"px", left:ons2011.docc._w.l+"px"});
-			if (poly._filter) {
-				n.innerHTML = "<div class='ttname'>"+ poly._filter.name + "</div><div><span>" + poly._filter.filter + ": </span><span class='ttlabel'>" + poly._filter.value +"</span></div>";
+			if (poly._filter && poly._filter.length > 0) {
+				
+				html = "<div class='ttname'>"+ poly._filter[0].name + "</div>";
+				
+				dojo.forEach(poly._filter, function(filter) {
+					html += "<div><span>" + filter.filter + ": </span><span class='ttlabel'>" + filter.value +"</span></div>";
+				});
+				
+				n.innerHTML = html;
+				
 			} else {			
 				n.innerHTML = neigh['name'];
 			}
@@ -591,7 +508,7 @@ ons2011.paintChoropleth = function(data, neighbourhoods, valArray) {
 			var color = dojox.color.fromHsl(h, s, l);
 			dojo.forEach(n.polygons, function(poly) {
 				poly.setOptions({fillColor: color.toHex(), fillOpacity: .7});
-				poly._filter = {name: n['name'], filter: filterLabel, value: value};
+				poly._filter.push({name: n['name'], filter: filterLabel, value: value});
 			});
 			
 		});
@@ -621,14 +538,14 @@ ons2011.paintCircles = function(data, neighbourhoods, valArray) {
 	var legend_container = dojo.byId("legendcontainer");
 	
 	for(var name in neighbourhoods) {
-		ons2011.findNeighbourhood(null, name).then(function(n) {
-			if (!n) {
+		ons2011.findNeighbourhood(null, name).then(function(neigh) {
+			if (!neigh) {
 				if (console && console.error) { console.error("Couldn't find neighbourhood for name: \"" + name + "\""); }
 				return;
 			}
 			
 			var value = neighbourhoods[name];
-			dojo.forEach(n.polygons, function(poly) {
+			dojo.forEach(neigh.polygons, function(poly) {
 				var bounds = poly.getBounds();
 				
 				poly.circle = new google.maps.Circle({
@@ -636,8 +553,19 @@ ons2011.paintCircles = function(data, neighbourhoods, valArray) {
 					strokeColor : "#ffffff",
 					map : poly.getMap(),
 					center : bounds.getCenter(),
-					radius : 1000*value/poly.getMap().getZoom()
+					radius : (20000*value)/(poly.getMap().getZoom()*10)
 				});
+				
+				poly._filter.push({name: neigh['name'], filter: filterLabel, value: value});
+				
+				google.maps.event.addListener(poly.circle , 'mouseover', function() {  
+					google.maps.event.trigger(poly, 'mouseover', arguments[0]);
+				});
+				
+				google.maps.event.addListener(poly.circle, 'mouseout', function() { 
+					google.maps.event.trigger(poly, 'mouseout', arguments[0]);
+				});
+	
 			});
 			
 		});
@@ -663,17 +591,16 @@ ons2011.filterMap = function(filterArray) {
 		dojo.forEach(arr, function(n) {
 			dojo.forEach(n.polygons, function(poly) {
 				poly.setOptions({fillColor: ons2011.defaultStyles.polygonOptions2011.fillColor, fillOpacity: ons2011.defaultStyles.polygonOptions2011.fillOpacity});
-				poly._filter = null;
+				poly._filter = [];
 				
 				if (poly.circle) {
 					poly.circle.setMap(null);
-					poly.circle = null;
 				}
 			});
 		});
 	});
 	
-	if (filterArray && filterArray.length > 0) {
+	if (filterArray && filterArray != "null" && filterArray.length > 0) {
 		
 		dojo.forEach(filterArray, function(filter) {
 			var data = ons2011.cache["categories"][category][layer][filter];
@@ -695,7 +622,9 @@ ons2011.filterMap = function(filterArray) {
 					ons2011.paintChoropleth(data, values, valArray);
 					
 				} else if (data["Proportional Circle"] == "YES") {
+				
 					ons2011.paintCircles(data, values, valArray);
+				
 				}
 			});
 		});
@@ -703,18 +632,70 @@ ons2011.filterMap = function(filterArray) {
 }
 
 /**
+ * If we are filtered, click this to show the points
+ */
+ons2011.showPoints = function() {
+	var category = dojo.byId('category_select').value;
+	var layer = dojo.byId('layer_select').value;
+	var attrs = dojo.byId('attribute_select').value;
+	
+	var selected = [];
+	
+	dojo.query("#points_select :checked").forEach(function(node){
+		if (node.value && node.value != "null") {
+			selected.push(node.value);
+		}
+	});
+	
+	if (!ons2011._currentMap.markers) {
+		ons2011._currentMap.markers = [];
+	}
+	ons2011._currentMap.clearMarkers();
+		
+	dojo.forEach(selected, function(tableid) {
+		var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select name,geometry,img from " + tableid});
+		request.execute(function(data){
+			if (data.rows) {
+				var count = 0;
+				var processNext = function() {
+					if (count >= data.rows.length) {
+						return;
+					}
+					var row = data.rows[count++];
+					var geo = ons2011.createGeometry (ons2011._currentMap, row[1]);
+					var marker = new google.maps.Marker({
+						  position: geo.latLngs,
+						  map: ons2011._currentMap,
+						  title: row[0],
+						  animation: google.maps.Animation.DROP,
+						  icon: row[2].length > 0 ? row[2] : data.rows[0][2],
+					});
+					ons2011._currentMap.markers.push(marker);
+					
+					setTimeout(processNext, 10);
+				};
+				
+				processNext();
+			}
+		});
+	});
+	
+}
+
+/**
  * A category has been selected from the dropdown
  */
 ons2011.categorySelected = function(category) {
 	var layerNode = dojo.byId('layer_select');
-		
+	var pointsSelect = dojo.byId('points_select');
+	
 	if (layerNode) {
 		dojo.attr(layerNode, 'disabled', false);
 		dojo.empty(layerNode);
 		dojo.create('option', {innerHTML:"", value: null}, layerNode);
 		//create our options
 		for (var layer in ons2011.cache["categories"][category]) {
-				dojo.create('option', {innerHTML:layer, value: layer}, layerNode);
+			dojo.create('option', {innerHTML:layer, value: layer}, layerNode);
 		};
 	}
 	
@@ -722,12 +703,35 @@ ons2011.categorySelected = function(category) {
 		dojo.query("label", layerNode.parentNode).forEach(function(node){
 			dojo.removeClass(node, 'disabled');
 		});
+		dojo.query("label", pointsSelect.parentNode).forEach(function(node){
+			dojo.removeClass(node, 'disabled');
+		});
 	} else {
 		dojo.query("label", layerNode.parentNode).forEach(function(node){
 			dojo.addClass(node, 'disabled');
 		});
+		dojo.query("label", pointsSelect.parentNode).forEach(function(node){
+			dojo.addClass(node, 'disabled');
+		});
 		
 		dojo.attr(layerNode, 'disabled', true);
+	}
+	
+	//show points per category
+	dojo.empty(pointsSelect);
+	dojo.attr(pointsSelect, 'disabled', true);
+	var data = ons2011.cache["categories"][category];
+	var adds = {};
+	dojo.create('option', {innerHTML:"", value: null}, pointsSelect);
+	for (var layer in data) {
+		for (var attr in data[layer]) {
+			var table = data[layer][attr]["Points of Interest Table ID"];
+			if (table && ! adds[layer]){
+				dojo.create('option', {innerHTML:layer, value: table}, pointsSelect);
+				adds[layer] = true;
+				dojo.attr(pointsSelect, 'disabled', false);
+			}
+		}
 	}
 }
 
@@ -744,7 +748,7 @@ ons2011.layerSelected = function(layer) {
 		dojo.create('option', {innerHTML:"", value: null}, attrNode);
 		//create our options
 		for (var layer in ons2011.cache["categories"][catNode.value][layer]) {
-				dojo.create('option', {innerHTML:layer, value: layer}, attrNode);
+			dojo.create('option', {innerHTML:layer, value: layer}, attrNode);
 		};
 	}
 	
@@ -769,6 +773,9 @@ ons2011.attributeSelected = function(attribute) {
 	
 	var selected = [];
 	var selType = null;
+	dojo.query("#attribute_select option").forEach(function(node2){
+		dojo.attr(node2, 'disabled', false);
+	});
 	
 	dojo.query("#attribute_select :checked").forEach(function(node){
 		var filter = node.value;
@@ -779,8 +786,10 @@ ons2011.attributeSelected = function(attribute) {
 			node.selected = false;
 			return;
 		}
-    	selType = data["Choropleth"] == "YES" ? "Choropleth" : "Proportional Circle";
-		selected.push(filter);
+		if (data) {
+    		selType = data["Choropleth"] == "YES" ? "Choropleth" : "Proportional Circle";
+			selected.push(filter);
+		}
        
     });
     
@@ -795,7 +804,7 @@ ons2011.attributeSelected = function(attribute) {
 			var data2 = ons2011.cache["categories"][category][layer][node2.value];
 			var curSelType = data2["Choropleth"] == "YES" ? "Choropleth" : "Proportional Circle";
 			if (selected[0] != node2.value && selType == curSelType) {
-				dojo.attr(node2, 'disabled', node2);
+				dojo.attr(node2, 'disabled', true);
 			}
 		});
 		
@@ -966,7 +975,6 @@ ons2011.createTabs = function() {
 
 onGoogleLoad = function() {
 	gapi.client.setApiKey('AIzaSyB8WOj6_y_qqbIfFJqx8s6RLjzK8yVF7Bc');
-
 }
 
 ons2011._ready = false;
