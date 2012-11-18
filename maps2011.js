@@ -158,58 +158,26 @@ ons2011.findNeighbourhood = function(id, name) {
  * queries our fusiontable for the coordinates of the id (or ids) and centers the map around it
  * @param the map
  * @param the id of the neighbourhood to center on
- * @return a deferred that will be fired when the map has been loaded and will return all of the lat/long
  */
 ons2011.fitMap = function(map, id) {
 	
-	
-	var def = new dojo.Deferred();
-	/*var queryText = "SELECT geometry FROM " + ons2011.mapid;
-	if (id) { queryText += " WHERE ID = " + id; }
-	queryText = encodeURIComponent(queryText);
-
-	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
-	var def = new dojo.Deferred();
-	
-	query.send(function(response) {
-		if (!response || !response.getDataTable()) { 
-			if (console && console.error) { console.error(response, queryText); }
-			return;
-		}
-		
-		var numRows = response.getDataTable().getNumberOfRows();
-
-		//create the list of lat/long coordinates
-		var coordinates = [];
-		for(i = 0; i < numRows; i++) {
-			var geometry = response.getDataTable().getValue(i, 0);
-			value = ons2011.parseKml(ons2011._currentMap,geometry);
-			dojo.forEach(value.latLngs.getArray(), function(l) {
-				try {
-					coordinates = coordinates.concat(l.getArray());
-				} catch (e) {}
-			});
-		}  
-
-		var bounds = new google.maps.LatLngBounds();
-		if (coordinates.length == 0) {
-			return;
-		}
-
-		for (var i = 0; i < coordinates.length; i++) {
-			bounds.extend(coordinates[i]);
-		}
-		map.fitBounds(bounds);
-	});*/
-	
-	//reset all of the neighbourhoods fill color
+	//zoom and reset all of the neighbourhoods fill color
 	ons2011.getAllNeighbourhoods().then(function(arr) {
-	
+		var bounds = new google.maps.LatLngBounds();
+		
 		dojo.forEach(arr, function(n) {
 			var color = ons2011.defaultStyles.polygonOptions2011.fillColor;
 			
-			if (parseInt(n.ID) === parseInt(id)) {
+			if (parseInt(n.id) === parseInt(id)) {
 				color = ons2011.defaultStyles.polygonOptions2011.highlightFillcolor;
+				//fit to bounds
+				if (n.geometry && n.geometry.bounds) {
+					bounds.union(n.geometry.bounds);
+				}
+			} else if (!id || id == "null") {
+				if (n.geometry && n.geometry.bounds) {
+					bounds.union(n.geometry.bounds);
+				}
 			}
 			
 			if (n.polygons) {
@@ -219,10 +187,9 @@ ons2011.fitMap = function(map, id) {
 			}
 		});
 		
-	});
-	
+		map.fitBounds(bounds);
 		
-	return def;
+	});
 } 
 
 /**
@@ -294,7 +261,9 @@ ons2011.createGeometry = function(map, geo) {
 	return ret;
 }
 
-//loads and caches data
+/*
+ *loads and caches the neighbourhood and category data
+ */
 ons2011.loadData = function () {
 	
 	var defLayers = new dojo.Deferred();
@@ -303,25 +272,69 @@ ons2011.loadData = function () {
 	gapi.client.load('fusiontables', 'v1', function(){
 	  var retData = {};
 	  
-	  var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select * from " + ons2011.layersId});
-      request.execute(function(DATA){
-      	retData["layers"] = DATA;
-      	//set up data
+	  //Load our layer/categories table
+	  var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select Category,Layer,'Polygon Attributes','Attribute Description','Data Table ID','Points of Interest Table ID','Polygon Layer','Point Layer','Choropleth','Proportional Circle' from " + ons2011.layersId});
+      request.execute(function(data){
+      
+      	ons2011.cache["layers"] = data;
+      		
+      	//set up the category data so we can use it easier
+      	var cats = {};
+      	dojo.forEach(data.rows, function(row, index) {
+      		if (!cats[row[0]]) {
+      			cats[row[0]] = {};
+      		}      		
+      		
+      		if (!cats[row[0]][row[1]]) {
+      			cats[row[0]][row[1]] = {};
+      		}      	
+      		
+      		if (!cats[row[0]][row[1]][row[3]]) {
+      			//create an object
+      			var layer = {};
+      			dojo.forEach(data.columns, function(column, index) {
+      				layer[column] = row[index];
+      			})
+      			cats[row[0]][row[1]][row[3]] = layer;
+      		}      		
+      	});
+      	
+      	ons2011.cache["categories"] = cats;
+      	
       	defLayers.resolve();
       });
       
+      //load our neighbourhoods and their geometry
       var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select id,name,geometry,\"pageid_en\",\"pageid_fr\" from " + ons2011.neighbourhoodsId});
       request.execute(function(data){
-      		retData["neighbourhoods"] = data;
-			defNeighbourhood.resolve(retData);
+      		ons2011.cache["neighbourhoods"] = [];
+      		
+      		var numRows = data.rows.length;
+			var numCols = data.columns.length;
+			var startCol = 0;
+			for(row = 0; row < numRows; row++) {
+				var retObj = {};
+				for(col = 0; col < numCols; col++) {
+					var value = data.rows[row][col];
+					var key =  data.columns[col];
+					if (key == "geometry") {
+						console.log(data.rows[row][0], data.rows[row][1], value);
+						value = ons2011.createGeometry(ons2011._currentMap,value);
+					}
+					
+					retObj[key] = value;
+				}
+				ons2011.cache["neighbourhoods"].push(retObj);
+			} 
+			
+      		
+			defNeighbourhood.resolve(ons2011.cache["neighbourhoods"]);
       });
     });
     
     return new dojo.DeferredList([defLayers, defNeighbourhood]);
 	
 }
-
-
 
 /**
  * queries our fusiontable for all of the neighbourhoods, and all of the data associated with it
@@ -336,30 +349,9 @@ ons2011.getAllNeighbourhoods = function() {
 		return def;
 	}
 	
-	ons2011.cache["neighbourhoods"] = [];
-
 	var def = new dojo.Deferred();
 	
 	ons2011.loadData().then(function(retArr) {
-		var response = retArr[1][1]["neighbourhoods"];
-	
-		var numRows = response.rows.length;
-		var numCols = response.columns.length;
-		var startCol = 0;
-		for(row = 0; row < numRows; row++) {
-			var retObj = {};
-			for(col = 0; col < numCols; col++) {
-				var value = response.rows[row][col];
-				var key =  response.columns[col];
-				if (key == "geometry") {
-					console.log(response.rows[row][0], response.rows[row][1], value);
-					value = ons2011.createGeometry(ons2011._currentMap,value);
-				}
-				retObj[key] = value;
-			}
-			ons2011.cache["neighbourhoods"].push(retObj);
-		} 
-		
 		def.callback(ons2011.cache["neighbourhoods"]);
 	});
 	
@@ -381,6 +373,14 @@ ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 		strokeOpacity: ons2011.defaultStyles.polygonOptions2011.strokeOpacity,
 		strokeWeight: ons2011.defaultStyles.polygonOptions2011.strokeWeight
 	  });
+	  
+	google.maps.Polygon.prototype.getBounds = function() {
+		var bounds = new google.maps.LatLngBounds();
+		for (i = 0; i < this.getPath().getArray().length; i++) {
+			bounds.extend(this.getPath().getArray()[i]);
+		}
+		return bounds
+	}
 	
 	var n = dojo.byId("ons2011Tooltip");
 
@@ -474,31 +474,16 @@ ons2011.showMap = function(mapnodeid, id) {
 	//store these globally
 	ons2011._currentMap = gmap;
 	
-	var query = {
-		select: 'geometry',
-		from: ons2011.neighbourhoodsId
-		//where: "'Neighbourhood Name' = 'Greenbelt'"
-	};
-	
-	if (typeof id == 'undefined') {
-		//all
-		/*dojo.forEach(ons2011.maps, function(map) {
-			var arrCoords = [];
-			dojo.forEach(map.poly, function(poly) {
-				var ll = new google.maps.LatLng(poly[1],poly[0]);
-				arrCoords.push(ll);
-			});
-			makePoly(arrCoords, map);
-		});*/
+	google.maps.event.addListener(gmap, 'zoom_changed', function() {
+		//relay out any highlights/filtering
+		ons2011.attributeSelected();
+	});
 		
-	}
-
 	//make polys
 	ons2011.getAllNeighbourhoods().then(function(arr) {
 	
 		//var layer = new google.maps.FusionTablesLayer({ query: query });
 		//ons2011._ons2011Layer = layer;
-		//layer.setMap(gmap);
 		
 		//create a poly for each neighbourhood
 		dojo.forEach(arr, function(neigh, index) {
@@ -523,51 +508,27 @@ ons2011.showMap = function(mapnodeid, id) {
 		});
 		
 		ons2011.fitMap(gmap, id);
-		
 	});
-	
-	
-	//return {map: gmap, layers: [layer]};
-}
-
-
-/*
-* get the file id from the column table
-* @param - column
-*/
-
-ons2011.getFileId = function(column) {
-	if (column == null) {
-		return ons2011.mapid;
-	}
-	var fileId = ons2011.mapid;
-	dojo.forEach(ons2011.columns, function(col) {
-		if (col.column == column) {
-			fileId = col.table ? col.table : ons2011.mapid;
-		}
-	});
-	return fileId;
 }
 
 
 /**
  * Returns a deferred containing the data for a specific filler
  */
-ons2011.getFilterData = function(filter) {
+ons2011.getFilterData = function(data) {
 	var def = new dojo.Deferred();
-	var queryText = "SELECT '" + filter + "', 'Neighbourhood Name' FROM " + ons2011.getFileId(filter);
 	
-	queryText = encodeURIComponent(queryText);
-
-	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
-
-	query.send(function(response) {
-			if (!response || !response.getDataTable()) { 
-				if (console && console.error) { console.error(response, queryText); }
-				return;
-			}
-			
-			var numRows = response.getDataTable().getNumberOfRows();
+	var tableid = data["Data Table ID"];
+	var attr = data["Polygon Attributes"];
+	var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select id,name," + attr +  " from " + tableid});
+    request.execute(function(data){
+    		
+    		if (!data.rows) {
+    			if (console && console.error) { console.error(response, queryText); }
+    			def.error();
+    		}
+    		
+			var numRows = data.rows.length;
 
 			//create the list of lat/long coordinates
 			var coordinates = [];
@@ -575,8 +536,8 @@ ons2011.getFilterData = function(filter) {
 			var max = 0;
 			var values = {};
 			for(i = 0; i < numRows; i++) {
-				var name = response.getDataTable().getValue(i, 1);
-				var value = response.getDataTable().getValue(i, 0);
+				var name = data.rows[i][1];
+				var value = data.rows[i][2];
 				
 				try {
 					value = parseFloat(parseFloat(value).toFixed(2));
@@ -598,144 +559,250 @@ ons2011.getFilterData = function(filter) {
 }
 
 /**
- * filters the map by highlighting 
-*/
-ons2011.filterMap = function(layer, filter) {
-
+ * Paints and filters each neighbourhood's polygons based on choropleth data
+ */
+ons2011.paintChoropleth = function(data, neighbourhoods, valArray) {
+	
+	var filterLabel = data["Attribute Description"];
 	var legend = dojo.byId("map_legend");
 	var legend_container = dojo.byId("legendcontainer");
 	
-	if (filter && filter.length > 0) {
-	
-		var filterLabel = filter;
-		dojo.forEach(ons2011.columns, function(n) {
-			if (n.column == filter) {
-				filterLabel = n.label;
+	for(var name in neighbourhoods) {
+		ons2011.findNeighbourhood(null, name).then(function(n) {
+			if (!n) {
+				if (console && console.error) { console.error("Couldn't find neighbourhood for name: \"" + name + "\""); }
+				return;
 			}
-		});
-	
-		ons2011.getFilterData(filter).then(function(values) {
-			var max = 0;
-			var pos = 0;
-			var valArray = new Array(values.length);
-			for (var name in values) {
-				var value = values[name];
-				if (value > max) { max = value; }
-				valArray[pos++] = value;
-			}
-			valArray.sort(function(a,b){return a - b});
-			
-			for(var name in values) {
-				ons2011.findNeighbourhood(null, name).then(function(n) {
-					if (!n) {
-						if (console && console.error) { console.error("Couldn't find neighbourhood for name: \"" + name + "\""); }
-						return;
-					}
-					var value = values[name];
-					var rank =0;
-					var centiles = 10;
-					for (i = 0; i < valArray.length; i++) {
-						if (value == valArray[i]) {
-							rank = i;
-							break;
-						}
-					};
-
-					var h = 120; //green
-					var s = 100;
-					var centile = parseInt((rank/valArray.length) * centiles);
-					// add 3 to the centile to increase the descrimination
-					var l = parseInt ((centiles - (centile + 1)) * (centiles+3));	
-					var color = dojox.color.fromHsl(h, s, l);
-					dojo.forEach(n.polygons, function(poly) {
-						poly.setOptions({fillColor: color.toHex(), fillOpacity: .7});
-							
-						poly._filter = {name: n['Neighbourhood Name'], filter: filterLabel, value: value};
-					});
-					
-				});
-			}
-			//set out our legend
-			if (legend) {
-				var texts = dojo.query('.legend_text');
-				for (var i=0;i<5;i++) {
-					var val = max*(.25*i);
-					if (texts && texts.length-1 >= i) {
-						dojo.attr(texts[i], "innerHTML", Math.round(val));
-					}
+			var value = neighbourhoods[name];
+			var rank =0;
+			var centiles = 10;
+			for (i = 0; i < valArray.length; i++) {
+				if (value == valArray[i]) {
+					rank = i;
+					break;
 				}
-				dojo.style(legend_container, 'display', 'block');
-				dojo.addClass(legend, 'green_gradient');
-			}
+			};
+
+			var h = 120; //green
+			var s = 100;
+			var centile = parseInt((rank/valArray.length) * centiles);
+			// add 3 to the centile to increase the descrimination
+			var l = parseInt ((centiles - (centile + 1)) * (centiles+3));	
+			var color = dojox.color.fromHsl(h, s, l);
+			dojo.forEach(n.polygons, function(poly) {
+				poly.setOptions({fillColor: color.toHex(), fillOpacity: .7});
+				poly._filter = {name: n['name'], filter: filterLabel, value: value};
+			});
+			
 		});
-	} else {
+	}
 	
-		if (legend) {
-			dojo.removeClass(legend, 'green_gradient');
-			dojo.style(legend_container, 'display', 'none');
+	//set out our legend
+	if (legend) {
+		var texts = dojo.query('.legend_text');
+		for (var i=0;i<5;i++) {
+			var val = max*(.25*i);
+			if (texts && texts.length-1 >= i) {
+				dojo.attr(texts[i], "innerHTML", Math.round(val));
+			}
 		}
-		
-		//reset all of our polygons
-		ons2011.getAllNeighbourhoods().then(function(arr) {
-			dojo.forEach(arr, function(n) {
-				dojo.forEach(n.polygons, function(poly) {
-					poly.setOptions({fillColor: ons2011.defaultStyles.polygonOptions2011.fillColor, fillOpacity: ons2011.defaultStyles.polygonOptions2011.fillOpacity});
-					poly._filter = null;
+		dojo.style(legend_container, 'display', 'block');
+		dojo.addClass(legend, 'green_gradient');
+	}
+}
+
+/**
+ * Paints circles!
+ */
+ons2011.paintCircles = function(data, neighbourhoods, valArray) {
+	
+	var filterLabel = data["Attribute Description"];
+	var legend = dojo.byId("map_legend");
+	var legend_container = dojo.byId("legendcontainer");
+	
+	for(var name in neighbourhoods) {
+		ons2011.findNeighbourhood(null, name).then(function(n) {
+			if (!n) {
+				if (console && console.error) { console.error("Couldn't find neighbourhood for name: \"" + name + "\""); }
+				return;
+			}
+			
+			var value = neighbourhoods[name];
+			dojo.forEach(n.polygons, function(poly) {
+				var bounds = poly.getBounds();
+				
+				poly.circle = new google.maps.Circle({
+					strokeWeight: 1,
+					strokeColor : "#ffffff",
+					map : poly.getMap(),
+					center : bounds.getCenter(),
+					radius : 1000*value/poly.getMap().getZoom()
 				});
+			});
+			
+		});
+	}
+}
+
+/**
+ * filters the map by highlighting or drawing circles 
+*/
+ons2011.filterMap = function(filterArray) {
+	var category = dojo.byId('category_select').value;
+	var layer = dojo.byId('layer_select').value;
+	
+	var legend = dojo.byId("map_legend");
+	
+	if (legend) {
+		dojo.removeClass(legend, 'green_gradient');
+		dojo.style(legend_container, 'display', 'none');
+	}
+	
+	//reset all of our polygons
+	ons2011.getAllNeighbourhoods().then(function(arr) {
+		dojo.forEach(arr, function(n) {
+			dojo.forEach(n.polygons, function(poly) {
+				poly.setOptions({fillColor: ons2011.defaultStyles.polygonOptions2011.fillColor, fillOpacity: ons2011.defaultStyles.polygonOptions2011.fillOpacity});
+				poly._filter = null;
+				
+				if (poly.circle) {
+					poly.circle.setMap(null);
+					poly.circle = null;
+				}
+			});
+		});
+	});
+	
+	if (filterArray && filterArray.length > 0) {
+		
+		dojo.forEach(filterArray, function(filter) {
+			var data = ons2011.cache["categories"][category][layer][filter];
+			ons2011.getFilterData(data).then(function(values) {
+				
+				var max = 0;
+				var pos = 0;
+				var valArray = new Array(values.length);
+				for (var name in values) {
+					var value = values[name];
+					if (value > max) { max = value; }
+					valArray[pos++] = value;
+				}
+				valArray.sort(function(a,b){return a - b});
+				
+				//if choroplet
+				if (data["Choropleth"] == "YES") {
+				
+					ons2011.paintChoropleth(data, values, valArray);
+					
+				} else if (data["Proportional Circle"] == "YES") {
+					ons2011.paintCircles(data, values, valArray);
+				}
 			});
 		});
 	}
 }
 
-/*
- * Update a filter <select> tag based on the selected category 'category'
- * @param nodeid the id of the select to update
- * @param labelid the id of a label to remove the 'disabled' css class from
- * @param category the new category
+/**
+ * A category has been selected from the dropdown
  */
-ons2011.updateFilter = function(nodeid, labelid, category) {
-	var node = dojo.byId(nodeid);
-	var label = dojo.byId(labelid);
+ons2011.categorySelected = function(category) {
+	var layerNode = dojo.byId('layer_select');
+		
+	if (layerNode) {
+		dojo.attr(layerNode, 'disabled', false);
+		dojo.empty(layerNode);
+		dojo.create('option', {innerHTML:"", value: null}, layerNode);
+		//create our options
+		for (var layer in ons2011.cache["categories"][category]) {
+				dojo.create('option', {innerHTML:layer, value: layer}, layerNode);
+		};
+	}
 	
-	if (node) {
-		dojo.attr(node, 'disabled', false);
-		dojo.empty(node);
-		dojo.create('option', {innerHTML:"", value: null}, node);
-		dojo.forEach(ons2011.columns, function(n) {
-			if (n.category && n.category == category) {
-					dojo.create('option', {innerHTML:n.label, value: n.column}, node);
+	if (category && category != "null") {
+		dojo.query("label", layerNode.parentNode).forEach(function(node){
+			dojo.removeClass(node, 'disabled');
+		});
+	} else {
+		dojo.query("label", layerNode.parentNode).forEach(function(node){
+			dojo.addClass(node, 'disabled');
+		});
+		
+		dojo.attr(layerNode, 'disabled', true);
+	}
+}
+
+/**
+ * A layer has been selected from the dropdown
+ */
+ons2011.layerSelected = function(layer) {
+	var catNode = dojo.byId('category_select');
+	var attrNode = dojo.byId('attribute_select');
+	
+	if (attrNode) {
+		dojo.attr(attrNode, 'disabled', false);
+		dojo.empty(attrNode);
+		dojo.create('option', {innerHTML:"", value: null}, attrNode);
+		//create our options
+		for (var layer in ons2011.cache["categories"][catNode.value][layer]) {
+				dojo.create('option', {innerHTML:layer, value: layer}, attrNode);
+		};
+	}
+	
+	if (layer && layer != "null") {
+		dojo.query("label", attrNode.parentNode).forEach(function(node){
+			dojo.removeClass(node, 'disabled');
+		});
+	} else {
+		dojo.query("label", attrNode.parentNode).forEach(function(node){
+			dojo.addClass(node, 'disabled');
+		});
+		dojo.attr(attrNode, 'disabled', attrNode);
+	}
+}
+
+/**
+ * A layer has been selected from the dropdown
+ */
+ons2011.attributeSelected = function(attribute) {
+	var category = dojo.byId('category_select').value;
+	var layer = dojo.byId('layer_select').value;
+	
+	var selected = [];
+	var selType = null;
+	
+	dojo.query("#attribute_select :checked").forEach(function(node){
+		var filter = node.value;
+		
+    	var data = ons2011.cache["categories"][category][layer][filter];
+    	
+		if (selected.length > 2) {
+			node.selected = false;
+			return;
+		}
+    	selType = data["Choropleth"] == "YES" ? "Choropleth" : "Proportional Circle";
+		selected.push(filter);
+       
+    });
+    
+    if (selected.length == 1) {
+		
+		//find all the other selects options and disable them
+		dojo.query("#attribute_select option").forEach(function(node2){
+			if (node2.value == "null") {
+				return;
+			}
+			
+			var data2 = ons2011.cache["categories"][category][layer][node2.value];
+			var curSelType = data2["Choropleth"] == "YES" ? "Choropleth" : "Proportional Circle";
+			if (selected[0] != node2.value && selType == curSelType) {
+				dojo.attr(node2, 'disabled', node2);
 			}
 		});
-	}
-	
-	if (category) {
-		if (label) dojo.removeClass(label, 'disabled');
-		ons2011.filterMap(ons2011._ons2011Layer, null);
-	} else {
-		dojo.attr(node, 'disabled', true);
-		if (label) dojo.addClass(label, 'disabled');
-		ons2011.filterMap(ons2011._ons2011Layer, null);
-	}
+		
+	}	
+        
+	ons2011.filterMap(selected);
 }
-
-/*
-ons2011.showChartDialog = function() {
-	var catnode = dojo.byId('chart_category_select');
-	ons2011.populateCategorySelect(catnode);
-
-	var myDialog = new dijit.Dialog({
-        	title: "Compare Data",
-            	style: "width: 60%; height: 600px; background: white;"
-       	});
-
-	dojo.place(dojo.byId("chartDialog"), myDialog.domNode);
-	dojo.style(dojo.byId("chartDialog"), {display: ""});
-	myDialog.show();
-	if (dojo.byId('chart_div')) {
-		ons2011.showChart('chart_div');
-	} 
-}
-*/
 
 /* 
  Shows a chart in the provided id, filtered by the 
@@ -815,14 +882,6 @@ ons2011.showChart = function(id,filterSelect) {
 		chart.draw(data, options2011);
 	});
 	
-	var d = ons2011.getAllNeighbourhoods().then(function(neighbourhoods) {
-		
-		dojo.forEach(neighbourhoods, function(n) {
-		//	data.addRow( [n[axes[0]], n[axes[1]] ] );
-		});
-	});
-	
-	
 }
 
 /* loading methods */
@@ -840,17 +899,14 @@ google.maps.Map.prototype.clearMarkers = function() {
 /**
  * Populates a select tag with all of the available categories
  */
-ons2011.populateCategorySelect = function(catnode) {
+ons2011.populateCategorySelect = function(catnode) {	
 	if (catnode) {
 		var created = {};
 		dojo.empty(catnode);
 		dojo.create('option', {innerHTML:"", value: null}, catnode);
-		dojo.forEach(ons2011.columns, function(n) {
-			if (n.category && ! created[n.category]) {
-				dojo.create('option', {innerHTML:n.category, value: n.category}, catnode);
-				created[n.category] = true;
-			}
-		});
+		for (var category in ons2011.cache["categories"]) {
+				dojo.create('option', {innerHTML:category, value: category}, catnode);
+		};
 	};
 }
 
@@ -864,7 +920,7 @@ ons2011.populateNeighbourhoodSelect = function(node) {
 			//add an empty one
 			dojo.create('option', {innerHTML:"", value: null}, node);
 			dojo.forEach(neighbourhoods, function(n) {
-				dojo.create('option', {innerHTML:n["Neighbourhood Name"], value: n.ID}, node);
+				dojo.create('option', {innerHTML:n["name"], value: n.id}, node);
 			});
 		});
 	}

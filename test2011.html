@@ -39,18 +39,21 @@
 	
 	<div>
 		<span> Zoom to Neighbourhood: </span>
-		<select id="neighbourhood_select" onchange="ons.fitMap(ons._currentMap, this.value)"></select>
+		<select id="neighbourhood_select" onchange="ons2011.fitMap(ons2011._currentMap, this.value)"></select>
 	</div>
 
 	<div>
-		<span> Categories: </span>
-		<select id="category_select" onchange="ons.updateFilter('filter_select', null, this.value);"></select>
+		<label id='categorylabel'> Category: </label>
+		<select id="category_select" onchange="ons2011.categorySelected(this.value);"></select>
 	</div>
 	<div>
-		<span> Filter By: </span>
-		<select id="filter_select" onchange="ons.filterMap(ons._onsLayer, this.value);"></select>
+		<label id='layerlabel' class='disabled'> Layer: </label>
+		<select id="layer_select" disabled="true" onchange="ons2011.layerSelected(this.value);"></select>
 	</div>
-
+	<div>
+		<label id='attributelabel' class='disabled'> Attribute: </label>
+		<select multiple="multiple" id="attribute_select" disabled="true" onchange="ons2011.attributeSelected(this.value);"></select>
+	</div>
 </body>
 </html>
 
