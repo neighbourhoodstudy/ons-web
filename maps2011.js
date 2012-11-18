@@ -1,12 +1,15 @@
 // we need the ons2011 map data.
 // we could include this with an amd module or something in the future
 if (!ons2011) {
-	//if (cons2011ole && cons2011ole.error) { cons2011ole.error("Could not find ons2011 map data"); }
+	//if (console && console.error) { console.error("Could not find ons2011 map data"); }
 	var ons2011 = {};
 }
 
+ons2011.fusionkey = 'AIzaSyB8WOj6_y_qqbIfFJqx8s6RLjzK8yVF7Bc';
+ons2011.layersId = "1_aBzanFdcsmGmDOo4xOTCXFpRwB1xlr2XnknqCc";
+ons2011.neighbourhoodsId = "1VD9W0XH5VxaVk1eV_WwM1NCQZaLXVXyzeAe7w5U";
 /*
- * our default styles for polygons2011 and lines (paths)
+ * our default styles for polygons and lines (paths)
  */
 ons2011.defaultStyles = { 
 		polygonOptions2011 : {
@@ -23,6 +26,15 @@ ons2011.defaultStyles = {
 			strokeWeight: 5
 		}
 };
+
+/*
+ * default options for our map
+ */
+ons2011.goptions= {
+	center: new google.maps.LatLng(45.25, -75.80),
+	zoom: 9,
+	mapTypeId: google.maps.MapTypeId.ROADMAP
+}
 
 
 //Name:	Age of Cons2011truction.csv
@@ -72,23 +84,23 @@ ons2011.showMarkers = function (obj, map, inputId) {
 	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
 	var def = new dojo.Deferred();
 	
-	query.send(function(respons2011e) {
-		if (!respons2011e || !respons2011e.getDataTable()) { 
-			if (cons2011ole && cons2011ole.error) { cons2011ole.error(respons2011e, queryText); }
+	query.send(function(response) {
+		if (!response || !response.getDataTable()) { 
+			if (console && console.error) { console.error(response, queryText); }
 			return;
 		}
-		var numRows = respons2011e.getDataTable().getNumberOfRows();
+		var numRows = response.getDataTable().getNumberOfRows();
 
 		//create the list of lat/long coordinates
 		var coordinates = [];
 		for (var i=0;i<numRows;i++) {
-			var name = respons2011e.getDataTable().getValue(i, 0);
-			var geometry = respons2011e.getDataTable().getValue(i, 1);
+			var name = response.getDataTable().getValue(i, 0);
+			var geometry = response.getDataTable().getValue(i, 1);
 			value = ons2011.parseKml(map,geometry);
 			
 			try {
 				if (value.marker) {
-					value.marker.setOptions2011({
+					value.marker.setOptions({
 						animation: google.maps.Animation.DROP,
 						icon: "/wp-content/uploads/2012/01/" + obj.icon,
 						title: name,
@@ -101,7 +113,7 @@ ons2011.showMarkers = function (obj, map, inputId) {
 				
 				if (value.polylines) {
 					dojo.forEach(value.polylines, function(p) {
-						p.setOptions2011({
+						p.setOptions({
 							title: name,
 							map: map,
 							strokeWeight: ons2011.defaultStyles.lineOptions2011.strokeWeight,
@@ -112,7 +124,7 @@ ons2011.showMarkers = function (obj, map, inputId) {
 				}
 
 			} catch (e) {
-				cons2011ole.error(e);
+				console.error(e);
 			}
 		}
 	});
@@ -131,7 +143,7 @@ ons2011.findNeighbourhood = function(id, name) {
 		dojo.forEach(arr, function(n) {
 			if (id && n.ID == id) {
 				r = n;
-			} else if (name && n["Neighbourhood Name"] == name) {
+			} else if (name && n["name"] == name) {
 				r = n;
 			}
 		});
@@ -150,25 +162,27 @@ ons2011.findNeighbourhood = function(id, name) {
  */
 ons2011.fitMap = function(map, id) {
 	
-	var queryText = "SELECT geometry FROM " + ons2011.mapid;
+	
+	var def = new dojo.Deferred();
+	/*var queryText = "SELECT geometry FROM " + ons2011.mapid;
 	if (id) { queryText += " WHERE ID = " + id; }
 	queryText = encodeURIComponent(queryText);
 
 	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
 	var def = new dojo.Deferred();
 	
-	query.send(function(respons2011e) {
-		if (!respons2011e || !respons2011e.getDataTable()) { 
-			if (cons2011ole && cons2011ole.error) { cons2011ole.error(respons2011e, queryText); }
+	query.send(function(response) {
+		if (!response || !response.getDataTable()) { 
+			if (console && console.error) { console.error(response, queryText); }
 			return;
 		}
 		
-		var numRows = respons2011e.getDataTable().getNumberOfRows();
+		var numRows = response.getDataTable().getNumberOfRows();
 
 		//create the list of lat/long coordinates
 		var coordinates = [];
 		for(i = 0; i < numRows; i++) {
-			var geometry = respons2011e.getDataTable().getValue(i, 0);
+			var geometry = response.getDataTable().getValue(i, 0);
 			value = ons2011.parseKml(ons2011._currentMap,geometry);
 			dojo.forEach(value.latLngs.getArray(), function(l) {
 				try {
@@ -186,7 +200,7 @@ ons2011.fitMap = function(map, id) {
 			bounds.extend(coordinates[i]);
 		}
 		map.fitBounds(bounds);
-	});
+	});*/
 	
 	//reset all of the neighbourhoods fill color
 	ons2011.getAllNeighbourhoods().then(function(arr) {
@@ -198,9 +212,9 @@ ons2011.fitMap = function(map, id) {
 				color = ons2011.defaultStyles.polygonOptions2011.highlightFillcolor;
 			}
 			
-			if (n.polygons2011) {
-				dojo.forEach(n.polygons2011, function(p) {
-					p.setOptions2011({fillColor: color});
+			if (n.polygons) {
+				dojo.forEach(n.polygons, function(p) {
+					p.setOptions({fillColor: color});
 				});
 			}
 		});
@@ -215,77 +229,96 @@ ons2011.fitMap = function(map, id) {
  * this uses http://geoxml3.googlecode.com/svn/branches/polys/geoxml3.js
  * to parse the kml
  */
-ons2011.parseKml = function(map, kml) {
+ons2011.createGeometry = function(map, geo) {
 
-    // create a geoXml3 parser for the click handlers
-	var infoWindow = new google.maps.InfoWindow(); 
-
-    var geoXml = new geoXML3.parser({
+	var ret = {};
+	if (dojo.isObject(geo)) {
+		var bounds = new google.maps.LatLngBounds();
+		var ltlLngs = [];
+			
+		if (geo.type == "GeometryCollection") {
+			for (var i = 0; i < geo.geometries.length; i++) {
+				var lls = [];
+				for (var j = 0; j < geo.geometries[i].coordinates[0].length; j++) {
+				  var vals = geo.geometries[i].coordinates[0][j];
+				  var ll = new google.maps.LatLng(vals[1], vals[0]);
+				  lls.push(ll);
+				  bounds.extend(ll);
+				}
+				
+				ltlLngs.push(lls);
+			}
+		}
+		else if (geo.geometry && geo.geometry.type == "Polygon") {
+			for (var i = 0; i < geo.geometry.coordinates[0].length; i++) {
+			  var vals = geo.geometry.coordinates[0][i];
+			  var ll = new google.maps.LatLng(vals[1], vals[0]);
+			  ltlLngs.push(ll);
+			  bounds.extend(ll);
+				
+			}
+		}
+			
+		ret.position = bounds.getCenter();
+		ret.bounds = bounds;
+		ret.latLngs = ltlLngs;
+		ret.type = geo.type;
+	} else {
+	
+		//try parsing it
+		var geoXml = new geoXML3.parser({
                     map: map,
 					zoom: false,
 					createMarker: function() {}
                     //infoWindow: infoWindow,
                     //singleInfoWindow: true
                 });
-
-	geoXml.parseKmlString("<Placemark>"+kml+"</Placemark>");
-    var ret = {};
-	if (geoXml.docs[0].placemarks[0].Polygon) {
-       geoXml.docs[0].gpolygons2011[0].setMap(null);
-       ret.position = geoXml.docs[0].gpolygons2011[0].bounds.getCenter();
-       ret.bounds = geoXml.docs[0].gpolygons2011[0].bounds;
-	   ret.latLngs = geoXml.docs[0].gpolygons2011[0].latLngs;
-    } else if (geoXml.docs[0].placemarks[0].LineString) {
-       geoXml.docs[0].gpolylines[0].setMap(null);
-       ret.position = geoXml.docs[0].gpolylines[0].bounds.getCenter();
-       ret.bounds = geoXml.docs[0].gpolylines[0].bounds;
-	   ret.latLngs = geoXml.docs[0].gpolylines[0].latLngs;
-	   ret.polylines = geoXml.docs[0].gpolylines;
-    } else if (geoXml.docs[0].placemarks[0].Point) {
-		ret.marker = new google.maps.Marker({position: geoXml.docs[0].placemarks[0].latlng});//geoXml.docs[0].placemarks[0].marker;
+                
+		geoXml.parseKmlString("<Placemark>"+geo+"</Placemark>");
+		if (geoXml.docs[0].placemarks[0].Polygon) {
+		   geoXml.docs[0].gpolygons[0].setMap(null);
+		   ret.position = geoXml.docs[0].gpolygons[0].bounds.getCenter();
+		   ret.bounds = geoXml.docs[0].gpolygons[0].bounds;
+		   ret.latLngs = geoXml.docs[0].gpolygons[0].latLngs[0];
+		} else if (geoXml.docs[0].placemarks[0].LineString) {
+		   geoXml.docs[0].gpolylines[0].setMap(null);
+		   ret.position = geoXml.docs[0].gpolylines[0].bounds.getCenter();
+		   ret.bounds = geoXml.docs[0].gpolylines[0].bounds;
+		   ret.latLngs = geoXml.docs[0].gpolylines[0].latLngs[0];
+		   ret.polylines = geoXml.docs[0].gpolylines;
+		} else if (geoXml.docs[0].placemarks[0].Point) {
+			ret.marker = new google.maps.Marker({position: geoXml.docs[0].placemarks[0].latlng});//geoXml.docs[0].placemarks[0].marker;
+		}
 	}
-
-    return ret;
+	
+	return ret;
 }
 
-/*
-* array of callbacks used by the deferred list to marshall the returning queries
-*/
-
-ons2011.callbackObjects = new Array();
-
-/*
-* create the queries for all the tables used to populate the cache
-*/
-
-ons2011.createQueries = function() {
-	var cols = [];
-	dojo.forEach(ons2011.columns, function(col) {
-		var tableId  = (col.table ? col.table : ons2011.mapid) + "";
-		if (cols[tableId] == null) {
-			cols[tableId] = new Array();
-		}
-		cols[tableId].push(col.column ? col.column : col.label);
-	});
+//loads and caches data
+ons2011.loadData = function () {
 	
-	var queries = [];
-	for (var id in cols) {
+	var defLayers = new dojo.Deferred();
+	var defNeighbourhood = new dojo.Deferred();
 	
-		if (id != (ons2011.mapid + "")) {
-			continue;
-		}
+	gapi.client.load('fusiontables', 'v1', function(){
+	  var retData = {};
+	  
+	  var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select * from " + ons2011.layersId});
+      request.execute(function(DATA){
+      	retData["layers"] = DATA;
+      	//set up data
+      	defLayers.resolve();
+      });
+      
+      var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select id,name,geometry,\"pageid_en\",\"pageid_fr\" from " + ons2011.neighbourhoodsId});
+      request.execute(function(data){
+      		retData["neighbourhoods"] = data;
+			defNeighbourhood.resolve(retData);
+      });
+    });
+    
+    return new dojo.DeferredList([defLayers, defNeighbourhood]);
 	
-		var queryTextu = "SELECT " 
-			+ "'" + cols[id].join("','") + "'" 
-			+ " FROM " + id + " ORDER BY 'Neighbourhood Name'";
-
-		queryText = encodeURIComponent(queryTextu);
-		queries.push( new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText));
-		var def = new dojo.Deferred();
-		ons2011.callbackObjects.length = ons2011.callbackObjects.length + 1;	
-		ons2011.callbackObjects[ons2011.callbackObjects.length-1] = def;
-	}
-	return queries;
 }
 
 
@@ -303,59 +336,36 @@ ons2011.getAllNeighbourhoods = function() {
 		return def;
 	}
 	
-	var arr = [];
-	ons2011.cache["neighbourhoods"] = arr;
-	var queries = ons2011.createQueries();
-	
-	var dlistObj = new dojo.DeferredList([ons2011.callbackObjects[0]]);
-	dojo.forEach (queries, function(query) {
+	ons2011.cache["neighbourhoods"] = [];
 
-		query.send(function(respons2011e) {
-			var def = ons2011.callbackObjects.pop();
-			def.callback(respons2011e);
-		});
-	});
+	var def = new dojo.Deferred();
 	
-	dlistObj.then(function(retVal) {
-		
-		for(resps = 0; resps < retVal.length; resps++) {
-			var respons2011e = retVal[resps][1];
-
-			if (!respons2011e || !respons2011e.getDataTable()) { 
-				if (cons2011ole && cons2011ole.error) { cons2011ole.error(respons2011e, "", ""); }
-				continue;
+	ons2011.loadData().then(function(retArr) {
+		var response = retArr[1][1]["neighbourhoods"];
+	
+		var numRows = response.rows.length;
+		var numCols = response.columns.length;
+		var startCol = 0;
+		for(row = 0; row < numRows; row++) {
+			var retObj = {};
+			for(col = 0; col < numCols; col++) {
+				var value = response.rows[row][col];
+				var key =  response.columns[col];
+				if (key == "geometry") {
+					console.log(response.rows[row][0], response.rows[row][1], value);
+					value = ons2011.createGeometry(ons2011._currentMap,value);
+				}
+				retObj[key] = value;
 			}
-	
-			var numRows = respons2011e.getDataTable().getNumberOfRows();
-			var numCols = respons2011e.getDataTable().getNumberOfColumns();
-			var startCol = 0;
-			dojo.forEach (ons2011.dataTables, function(dataTable) {
-				if (numCols == dataTable.noColumns) {
-					startCol = dataTable.startColumn;
-				}
-			});
-			
-			for(i = 0; i < numRows; i++) {
-				var retObj = {};
-				for(j = 0; j < numCols; j++) {
-					var value = respons2011e.getDataTable().getValue(i, j);
-					var pos = j + startCol;
-					var key = ons2011.columns[pos].column ? ons2011.columns[pos].column : ons2011.columns[pos].label;
-					if (key == "geometry") {
-						value = ons2011.parseKml(ons2011._currentMap,value);
-					}
-					retObj[key] = value;
-				}
-				ons2011.cache["neighbourhoods"].push(retObj);
-			} 
-		}
+			ons2011.cache["neighbourhoods"].push(retObj);
+		} 
+		
 		def.callback(ons2011.cache["neighbourhoods"]);
 	});
-
-
 	
 	return def;
 } 
+
 /**
  * Makes a polygon for the given coordinates and the map
   * @param arrCoords, an array of google.maps.LatLng objects
@@ -388,9 +398,9 @@ ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 		
 	google.maps.event.addListener(poly, 'mouseover', function() {  
 		this.origOpac = this.fillOpacity;
-		dojo.forEach(neigh.polygons2011, function(poly) {
+		dojo.forEach(neigh.polygons, function(poly) {
 			poly.origOpac = poly.fillOpacity;
-			poly.setOptions2011({fillOpacity: poly.fillOpacity+.2}); 
+			poly.setOptions({fillOpacity: poly.fillOpacity+.2}); 
 		});
 		
 		clearTimeout(ons2011.timeout2);
@@ -403,7 +413,7 @@ ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 			if (poly._filter) {
 				n.innerHTML = "<div class='ttname'>"+ poly._filter.name + "</div><div><span>" + poly._filter.filter + ": </span><span class='ttlabel'>" + poly._filter.value +"</span></div>";
 			} else {			
-				n.innerHTML = neigh['Neighbourhood Name'];
+				n.innerHTML = neigh['name'];
 			}
 			
 			ons2011.timeout3 = setTimeout(function() {
@@ -413,8 +423,8 @@ ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 	});
 	
 	google.maps.event.addListener(poly, 'mouseout', function() { 
-		dojo.forEach(neigh.polygons2011, function(poly) {
-			poly.setOptions2011({fillOpacity: poly.origOpac}); 
+		dojo.forEach(neigh.polygons, function(poly) {
+			poly.setOptions({fillOpacity: poly.origOpac}); 
 		});
 		clearTimeout(ons2011.timeout1);
 		clearTimeout(ons2011.timeout3);	
@@ -454,16 +464,19 @@ ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 /** 
  *  Displays a map  
  * @param mapnodeid the id of the dom node in which to draw the map
- * @param id (optional), if supplied, only show the polygons2011 for the provided id or ids (an array is accepted). If
- *          null, don't show any polygons2011
+ * @param id (optional), if supplied, only show the polygons for the provided id or ids (an array is accepted). If
+ *          null, don't show any polygons
  */
 ons2011.showMap = function(mapnodeid, id) {
 
-	var gmap = new google.maps.Map(document.getElementById(mapnodeid), ons2011.goptions2011);
+	var gmap = new google.maps.Map(document.getElementById(mapnodeid), ons2011.goptions);
+	
+	//store these globally
+	ons2011._currentMap = gmap;
 	
 	var query = {
 		select: 'geometry',
-		from: ons2011.mapid
+		from: ons2011.neighbourhoodsId
 		//where: "'Neighbourhood Name' = 'Greenbelt'"
 	};
 	
@@ -482,28 +495,37 @@ ons2011.showMap = function(mapnodeid, id) {
 
 	//make polys
 	ons2011.getAllNeighbourhoods().then(function(arr) {
-		var layer = new google.maps.FusionTablesLayer({ query: query/*, styles: styles*/ });
-		ons2011._ons2011Layer = layer;
+	
+		//var layer = new google.maps.FusionTablesLayer({ query: query });
+		//ons2011._ons2011Layer = layer;
+		//layer.setMap(gmap);
 		
 		//create a poly for each neighbourhood
 		dojo.forEach(arr, function(neigh, index) {
 			var geometry = neigh['geometry'];
-						
+			if (!geometry || !geometry.latLngs) {
+				return;
+			}
+			
 			//we have to do this because there's a bug in google maps (maybe) where it won't draw this correctly
-			var bs = geometry.latLngs.b.concat();
-			neigh.polygons2011 = [];
-			dojo.forEach(bs, function(b) {
-				geometry.latLngs.b = [b];
-				neigh.polygons2011.push(ons2011.makePoly(geometry.latLngs, gmap, neigh));
-			});
+			var bs = geometry.latLngs.b ? geometry.latLngs.b.concat() : geometry.latLngs.concat();
+			neigh.polygons = [];
+			
+			//Geometry Collections are arrays
+			if (dojo.isArray(bs[0])) {
+				dojo.forEach(bs, function(ll) {
+					neigh.polygons.push(ons2011.makePoly(ll, gmap, neigh));
+				});
+			} else {
+				neigh.polygons.push(ons2011.makePoly(bs, gmap, neigh));
+			}
+			
 		});
 		
 		ons2011.fitMap(gmap, id);
 		
 	});
 	
-	//store these globally
-	ons2011._currentMap = gmap;
 	
 	//return {map: gmap, layers: [layer]};
 }
@@ -529,7 +551,7 @@ ons2011.getFileId = function(column) {
 
 
 /**
- * Returns a deferred containing the data for a specific filter
+ * Returns a deferred containing the data for a specific filler
  */
 ons2011.getFilterData = function(filter) {
 	var def = new dojo.Deferred();
@@ -539,13 +561,13 @@ ons2011.getFilterData = function(filter) {
 
 	var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + queryText);
 
-	query.send(function(respons2011e) {
-			if (!respons2011e || !respons2011e.getDataTable()) { 
-				if (cons2011ole && cons2011ole.error) { cons2011ole.error(respons2011e, queryText); }
+	query.send(function(response) {
+			if (!response || !response.getDataTable()) { 
+				if (console && console.error) { console.error(response, queryText); }
 				return;
 			}
 			
-			var numRows = respons2011e.getDataTable().getNumberOfRows();
+			var numRows = response.getDataTable().getNumberOfRows();
 
 			//create the list of lat/long coordinates
 			var coordinates = [];
@@ -553,8 +575,8 @@ ons2011.getFilterData = function(filter) {
 			var max = 0;
 			var values = {};
 			for(i = 0; i < numRows; i++) {
-				var name = respons2011e.getDataTable().getValue(i, 1);
-				var value = respons2011e.getDataTable().getValue(i, 0);
+				var name = response.getDataTable().getValue(i, 1);
+				var value = response.getDataTable().getValue(i, 0);
 				
 				try {
 					value = parseFloat(parseFloat(value).toFixed(2));
@@ -606,7 +628,7 @@ ons2011.filterMap = function(layer, filter) {
 			for(var name in values) {
 				ons2011.findNeighbourhood(null, name).then(function(n) {
 					if (!n) {
-						if (cons2011ole && cons2011ole.error) { cons2011ole.error("Couldn't find neighbourhood for name: \"" + name + "\""); }
+						if (console && console.error) { console.error("Couldn't find neighbourhood for name: \"" + name + "\""); }
 						return;
 					}
 					var value = values[name];
@@ -625,8 +647,8 @@ ons2011.filterMap = function(layer, filter) {
 					// add 3 to the centile to increase the descrimination
 					var l = parseInt ((centiles - (centile + 1)) * (centiles+3));	
 					var color = dojox.color.fromHsl(h, s, l);
-					dojo.forEach(n.polygons2011, function(poly) {
-						poly.setOptions2011({fillColor: color.toHex(), fillOpacity: .7});
+					dojo.forEach(n.polygons, function(poly) {
+						poly.setOptions({fillColor: color.toHex(), fillOpacity: .7});
 							
 						poly._filter = {name: n['Neighbourhood Name'], filter: filterLabel, value: value};
 					});
@@ -653,11 +675,11 @@ ons2011.filterMap = function(layer, filter) {
 			dojo.style(legend_container, 'display', 'none');
 		}
 		
-		//reset all of our polygons2011
+		//reset all of our polygons
 		ons2011.getAllNeighbourhoods().then(function(arr) {
 			dojo.forEach(arr, function(n) {
-				dojo.forEach(n.polygons2011, function(poly) {
-					poly.setOptions2011({fillColor: ons2011.defaultStyles.polygonOptions2011.fillColor, fillOpacity: ons2011.defaultStyles.polygonOptions2011.fillOpacity});
+				dojo.forEach(n.polygons, function(poly) {
+					poly.setOptions({fillColor: ons2011.defaultStyles.polygonOptions2011.fillColor, fillOpacity: ons2011.defaultStyles.polygonOptions2011.fillOpacity});
 					poly._filter = null;
 				});
 			});
@@ -725,6 +747,10 @@ ons2011.showChart = function(id,filterSelect) {
 	var messageDiv = dojo.byId("chart_message");
 	var neighbourhoodsDiv = dojo.byId("chart_neighbourhoods");
 	var chartSort = dojo.byId("chart_sort");
+
+	if (!chartDiv) {
+		return;
+	}
 	
 	//in case it's an id
 	filterSelect = dojo.byId(filterSelect);
@@ -800,7 +826,7 @@ ons2011.showChart = function(id,filterSelect) {
 }
 
 /* loading methods */
-google.load('visualization', '1', {packages: ['corechart']});
+//google.load('visualization', '1', {packages: ['corechart']});
 
 //add a clear markers method
 google.maps.Map.prototype.clearMarkers = function() {
@@ -882,8 +908,17 @@ ons2011.createTabs = function() {
     dojo.place(dojo.byId("chartTab"), cp2.domNode);
 }
 
+onGoogleLoad = function() {
+	gapi.client.setApiKey('AIzaSyB8WOj6_y_qqbIfFJqx8s6RLjzK8yVF7Bc');
+
+}
+
+ons2011._ready = false;
+
 require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/DeferredList", "dijit/Dialog", "dijit/layout/TabContainer", "dijit/layout/ContentPane"], function(url, dom, ready, color, deferredlist, Dialog, TextBox, Button){
          ready(function(){
+         	
+         	//TODO - show a loading dialog thing
 			$j = $;
 			
 			//set up our collapsible headers (faq page)
@@ -891,6 +926,7 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 
 			//first thing we do is load all our neighbourhoods so we can cache them
 			var d = ons2011.getAllNeighbourhoods().then(function(neighbourhoods) {
+				
 				//if we have a 'map_canvas', show a map in it
 				if (dojo.byId('map_canvas')) {
 					var id = undefined;

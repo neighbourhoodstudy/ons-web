@@ -1,0 +1,11 @@
+      <div class="collapsible">
+      <div class="header collapsed">? How can I compare neighbourhoods?</div>
+      <div class="content" style="padding-left: 30px;">Click the Neighbourhoods tab and go to the Maps page. <span style="color: #ff0000;">More to come.</span></div>
+      </div>
+
+
+
+      <div class="collapsible">
+      <div class="header collapsed">? Comment puis-je comparer les quartiers?</div>
+      <div class="content" style="padding-left: 30px;">Cliquez sur l'onglet quartiers et allez à la page des Cartes.<span style="color: #ff0000;">More to come.</span></div>
+      </div>
