@@ -12,7 +12,7 @@ ons2011.neighbourhoodsId = "1VD9W0XH5VxaVk1eV_WwM1NCQZaLXVXyzeAe7w5U";
  * our default styles for polygons and lines (paths)
  */
 ons2011.defaultStyles = { 
-		polygonOptions2011 : {
+		polygonoptions : {
 			fillColor : "#319869",
 			fillOpacity :  0.5,
 			strokeColor : "#326D96",
@@ -21,7 +21,7 @@ ons2011.defaultStyles = {
 			strokeWeight: 1
 		},
 		
-		lineOptions2011: {
+		lineoptions: {
 			strokeColor : "#886D96",
 			strokeWeight: 5
 		}
@@ -70,15 +70,17 @@ ons2011.findNeighbourhood = function(id, name) {
  */
 ons2011.fitMap = function(map, id) {
 	
+	ons2011._highlightedNeighbourhood = id;
+	
 	//zoom and reset all of the neighbourhoods fill color
 	ons2011.getAllNeighbourhoods().then(function(arr) {
 		var bounds = new google.maps.LatLngBounds();
-		
-		dojo.forEach(arr, function(n) {
-			var color = ons2011.defaultStyles.polygonOptions2011.fillColor;
 			
+		dojo.forEach(arr, function(n) {
+			var color = ons2011.defaultStyles.polygonoptions.fillColor;
+		
 			if (parseInt(n.id) === parseInt(id)) {
-				color = ons2011.defaultStyles.polygonOptions2011.highlightFillcolor;
+				color = ons2011.defaultStyles.polygonoptions.highlightFillcolor;
 				//fit to bounds
 				if (n.geometry && n.geometry.bounds) {
 					bounds.union(n.geometry.bounds);
@@ -227,7 +229,6 @@ ons2011.loadData = function () {
 					var value = data.rows[row][col];
 					var key =  data.columns[col];
 					if (key == "geometry") {
-						console.log(data.rows[row][0], data.rows[row][1], value);
 						value = ons2011.createGeometry(ons2011._currentMap,value);
 					}
 					
@@ -276,11 +277,11 @@ ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 	
 	var poly = new google.maps.Polygon({
 		path: arrCoords,
-		fillColor: ons2011.defaultStyles.polygonOptions2011.fillColor,
-		fillOpacity: ons2011.defaultStyles.polygonOptions2011.fillOpacity,
-		strokeColor: ons2011.defaultStyles.polygonOptions2011.strokeColor,
-		strokeOpacity: ons2011.defaultStyles.polygonOptions2011.strokeOpacity,
-		strokeWeight: ons2011.defaultStyles.polygonOptions2011.strokeWeight
+		fillColor: ons2011.defaultStyles.polygonoptions.fillColor,
+		fillOpacity: ons2011.defaultStyles.polygonoptions.fillOpacity,
+		strokeColor: ons2011.defaultStyles.polygonoptions.strokeColor,
+		strokeOpacity: ons2011.defaultStyles.polygonoptions.strokeOpacity,
+		strokeWeight: ons2011.defaultStyles.polygonoptions.strokeWeight
 	  });
 	  
 	google.maps.Polygon.prototype.getBounds = function() {
@@ -424,7 +425,7 @@ ons2011.showMap = function(mapnodeid, id) {
 			
 		});
 		
-		ons2011.fitMap(gmap, id);
+		ons2011.fitMap(gmap, null);
 	});
 }
 
@@ -436,6 +437,12 @@ ons2011.getFilterData = function(data) {
 	var def = new dojo.Deferred();
 	
 	var tableid = data["Data Table ID"];
+	
+	if (!tableid) {
+		def.callback();
+		return def;
+	}
+	
 	var attr = data["Polygon Attributes"];
 	var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select id,name," + attr +  " from " + tableid});
     request.execute(function(data){
@@ -478,7 +485,7 @@ ons2011.getFilterData = function(data) {
 /**
  * Paints and filters each neighbourhood's polygons based on choropleth data
  */
-ons2011.paintChoropleth = function(data, neighbourhoods, valArray) {
+ons2011.paintChoropleth = function(data, neighbourhoods, valArray, max) {
 	
 	var filterLabel = data["Attribute Description"];
 	var legend = dojo.byId("map_legend");
@@ -545,29 +552,42 @@ ons2011.paintCircles = function(data, neighbourhoods, valArray) {
 			}
 			
 			var value = neighbourhoods[name];
+			
+			var bounds = new google.maps.LatLngBounds();
+			var map = null;
 			dojo.forEach(neigh.polygons, function(poly) {
-				var bounds = poly.getBounds();
-				
-				poly.circle = new google.maps.Circle({
+				bounds.union(poly.getBounds());
+				map = poly.getMap();
+			});
+			
+			if (!neigh.circle) {
+				neigh.circle = new google.maps.Circle({
 					strokeWeight: 1,
-					strokeColor : "#ffffff",
-					map : poly.getMap(),
-					center : bounds.getCenter(),
-					radius : (20000*value)/(poly.getMap().getZoom()*10)
+					strokeColor : "#ffffff"
 				});
-				
-				poly._filter.push({name: neigh['name'], filter: filterLabel, value: value});
-				
-				google.maps.event.addListener(poly.circle , 'mouseover', function() {  
+			}
+			
+			dojo.forEach(neigh.polygons, function(poly) {
+				google.maps.event.addListener(neigh.circle , 'mouseover', function() {  
 					google.maps.event.trigger(poly, 'mouseover', arguments[0]);
 				});
 				
-				google.maps.event.addListener(poly.circle, 'mouseout', function() { 
+				google.maps.event.addListener(neigh.circle, 'mouseout', function() { 
 					google.maps.event.trigger(poly, 'mouseout', arguments[0]);
 				});
-	
+				
+				poly._filter.push({name: neigh['name'], filter: filterLabel, value: value});
 			});
 			
+			neigh.circle.setOptions({
+				center : bounds.getCenter(),
+				radius : (20000*value)/(map.getZoom()*10),
+				map : map
+			});
+			
+			
+			
+	
 		});
 	}
 }
@@ -580,21 +600,25 @@ ons2011.filterMap = function(filterArray) {
 	var layer = dojo.byId('layer_select').value;
 	
 	var legend = dojo.byId("map_legend");
+	var legend_container = dojo.byId("legendcontainer");
 	
 	if (legend) {
 		dojo.removeClass(legend, 'green_gradient');
 		dojo.style(legend_container, 'display', 'none');
 	}
 	
-	//reset all of our polygons
+	//reset all of our polygons	
 	ons2011.getAllNeighbourhoods().then(function(arr) {
 		dojo.forEach(arr, function(n) {
 			dojo.forEach(n.polygons, function(poly) {
-				poly.setOptions({fillColor: ons2011.defaultStyles.polygonOptions2011.fillColor, fillOpacity: ons2011.defaultStyles.polygonOptions2011.fillOpacity});
 				poly._filter = [];
 				
-				if (poly.circle) {
-					poly.circle.setMap(null);
+				if (n.id != ons2011._highlightedNeighbourhood) {
+					poly.setOptions({fillColor: ons2011.defaultStyles.polygonoptions.fillColor});
+					
+					if (n.circle) {
+						n.circle.setMap(null);
+					}
 				}
 			});
 		});
@@ -605,6 +629,9 @@ ons2011.filterMap = function(filterArray) {
 		dojo.forEach(filterArray, function(filter) {
 			var data = ons2011.cache["categories"][category][layer][filter];
 			ons2011.getFilterData(data).then(function(values) {
+				if (!values) {
+					return;
+				}
 				
 				var max = 0;
 				var pos = 0;
@@ -619,11 +646,11 @@ ons2011.filterMap = function(filterArray) {
 				//if choroplet
 				if (data["Choropleth"] == "YES") {
 				
-					ons2011.paintChoropleth(data, values, valArray);
+					ons2011.paintChoropleth(data, values, valArray, max);
 					
 				} else if (data["Proportional Circle"] == "YES") {
 				
-					ons2011.paintCircles(data, values, valArray);
+					ons2011.paintCircles(data, values, valArray, max);
 				
 				}
 			});
@@ -686,8 +713,12 @@ ons2011.showPoints = function() {
  * A category has been selected from the dropdown
  */
 ons2011.categorySelected = function(category) {
+	var categorySelect = dojo.byId('category_select');
 	var layerNode = dojo.byId('layer_select');
 	var pointsSelect = dojo.byId('points_select');
+	var attrNode = dojo.byId('attribute_select');
+	
+	ons2011.layerSelected(null);
 	
 	if (layerNode) {
 		dojo.attr(layerNode, 'disabled', false);
@@ -707,6 +738,8 @@ ons2011.categorySelected = function(category) {
 			dojo.removeClass(node, 'disabled');
 		});
 	} else {
+		ons2011.filterMap(null);
+		categorySelect.selectedIndex = 0;
 		dojo.query("label", layerNode.parentNode).forEach(function(node){
 			dojo.addClass(node, 'disabled');
 		});
@@ -747,9 +780,11 @@ ons2011.layerSelected = function(layer) {
 		dojo.empty(attrNode);
 		dojo.create('option', {innerHTML:"", value: null}, attrNode);
 		//create our options
-		for (var layer in ons2011.cache["categories"][catNode.value][layer]) {
-			dojo.create('option', {innerHTML:layer, value: layer}, attrNode);
-		};
+		if (layer && layer != "null") {
+			for (var layer in ons2011.cache["categories"][catNode.value][layer]) {
+				dojo.create('option', {innerHTML:layer, value: layer}, attrNode);
+			};
+		}
 	}
 	
 	if (layer && layer != "null") {
@@ -757,6 +792,7 @@ ons2011.layerSelected = function(layer) {
 			dojo.removeClass(node, 'disabled');
 		});
 	} else {
+		ons2011.filterMap(null);
 		dojo.query("label", attrNode.parentNode).forEach(function(node){
 			dojo.addClass(node, 'disabled');
 		});
@@ -786,6 +822,7 @@ ons2011.attributeSelected = function(attribute) {
 			node.selected = false;
 			return;
 		}
+		
 		if (data) {
     		selType = data["Choropleth"] == "YES" ? "Choropleth" : "Proportional Circle";
 			selected.push(filter);
@@ -813,10 +850,20 @@ ons2011.attributeSelected = function(attribute) {
 	ons2011.filterMap(selected);
 }
 
+
+/*
+ * Clears all selected filters
+ */
+ons2011.clearFilters = function() {
+	ons2011.categorySelected(null);
+	ons2011.layerSelected(null);
+	ons2011.filterMap(null);
+}
+
 /* 
  Shows a chart in the provided id, filtered by the 
 */
-ons2011.showChart = function(id,filterSelect) {
+ons2011.showChart = function(id) {
 
 	var chartDiv = dojo.byId("chart_div");
 	var filterDiv = dojo.byId("chart_filter");
@@ -824,14 +871,18 @@ ons2011.showChart = function(id,filterSelect) {
 	var neighbourhoodsDiv = dojo.byId("chart_neighbourhoods");
 	var chartSort = dojo.byId("chart_sort");
 
+	var category = dojo.byId('category_select').value;
+	var layer = dojo.byId('layer_select').value;
+	var selected = [];
+	dojo.query("#attribute_select :checked").forEach(function(node){
+		selected.push(node.value);
+	});
+	
 	if (!chartDiv) {
 		return;
 	}
-	
-	//in case it's an id
-	filterSelect = dojo.byId(filterSelect);
-	
-	if (!filterSelect || filterSelect.selectedIndex == 0) {
+		
+	if (selected.length == 0) {
 		dojo.style(filterDiv, {display: "none"});
 		dojo.style(messageDiv, {display: ""});
 		dojo.style(neighbourhoodsDiv, {display: "none"});
@@ -844,8 +895,13 @@ ons2011.showChart = function(id,filterSelect) {
 	dojo.style(neighbourhoodsDiv, {display: ""});
 	dojo.style(chartDiv, {display: ""});
 	
-	var filter = filterSelect.value;
-	var axes = ['Neighbourhood Name', filterSelect.options2011[filterSelect.selectedIndex].innerHTML];
+	var catData = ons2011.cache["categories"][category][layer][selected[0]];
+	
+	if (!catData) {
+		return;
+	}
+	
+	var axes = ['Neighbourhood Name', catData["Attribute Description"]];
 	var data = new google.visualization.DataTable();
 	
 	data.addColumn('string', axes[0]);
@@ -853,17 +909,20 @@ ons2011.showChart = function(id,filterSelect) {
 	
 	//find the selected neighbourhoods
 	var neighs = [];
-	for (var i=1;i<neighbourhoodsDiv.options2011.length;i++) {
-		if (neighbourhoodsDiv.options2011[i].selected) {
-        	neighs.push(neighbourhoodsDiv.options2011[i].innerHTML);
+	for (var i=1;i<neighbourhoodsDiv.options.length;i++) {
+		if (neighbourhoodsDiv.options[i].selected) {
+        	neighs.push(neighbourhoodsDiv.options[i].innerHTML);
     	}
 	}
 	
-	var sort = chartSort.selectedIndex > 0 ? chartSort.options2011[chartSort.selectedIndex] : null;
+	var sort = chartSort.selectedIndex > 0 ? chartSort.options[chartSort.selectedIndex] : null;
 	
-	ons2011.getFilterData(filter).then(function(values) {
+	ons2011.getFilterData(catData).then(function(values) {
+		if (!values) {
+			return;
+		}
 		
-		var options2011 = {
+		var options = {
        		title: axes[1],
 			hAxis: {title: axes[0], titleTextStyle: {color: 'black', }}
 		};
@@ -880,21 +939,21 @@ ons2011.showChart = function(id,filterSelect) {
 		
 		//sort the data
 		if (chartSort.selectedIndex > 0){
-			if (chartSort.options2011[chartSort.selectedIndex].value == "asc") {
+			if (chartSort.options[chartSort.selectedIndex].value == "asc") {
 				data.sort({column: 1, desc: false});
-			} else if (chartSort.options2011[chartSort.selectedIndex].value == "desc") {
+			} else if (chartSort.options[chartSort.selectedIndex].value == "desc") {
 				data.sort({column: 1, desc: true});
 			}
 		}
 
 		var chart = new google.visualization.ColumnChart(dojo.byId(id));
-		chart.draw(data, options2011);
+		chart.draw(data, options);
 	});
 	
 }
 
 /* loading methods */
-//google.load('visualization', '1', {packages: ['corechart']});
+google.load('visualization', '1', {packages: ['corechart']});
 
 //add a clear markers method
 google.maps.Map.prototype.clearMarkers = function() {
@@ -988,6 +1047,8 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 			//set up our collapsible headers (faq page)
 			//$j.collapsible('.collapsible .header')
 
+			ons2011.createTabs();
+				
 			//first thing we do is load all our neighbourhoods so we can cache them
 			var d = ons2011.getAllNeighbourhoods().then(function(neighbourhoods) {
 				
@@ -998,7 +1059,15 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 					if (u.query) {
 						var q = dojo.queryToObject(u.query || {}); 
 						id = q.page_id ? q.page_id: id;
-						if (id == 129) { id = undefined; } //the maps page
+						
+						//see if we have this id in our pageid_en or pageid_fr
+						var found = false;
+						dojo.forEach(neighbourhoods, function(neigh) {
+							if (neigh["pageid_en"] == id || neigh["pageid_fr"] == id) {
+								found = true;
+							}
+						});
+						if (!found) { id = undefined; } //the maps page
 					}
 					ons2011.showMap('map_canvas', id);
 				}
@@ -1012,13 +1081,11 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 					ons2011.populateNeighbourhoodSelect(node);
 				}
 
-
 				var neighbourhoodsDiv = dojo.byId("chart_neighbourhoods");
 				if (neighbourhoodsDiv) {
 					ons2011.populateNeighbourhoodSelect(neighbourhoodsDiv);
 				}
 				
-				ons2011.createTabs();
 			});
 		});
 });
