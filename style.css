@@ -305,6 +305,7 @@ div.suf-widget {
 }
 
 #map_canvas {
+	background-color: #DDDDDD;
 	height: 100%;
 	width: 100%;
 }
@@ -313,6 +314,12 @@ div.suf-widget {
 	width: 100%;
 	font-size: 1.1em;
 	text-align: left;
+}
+
+.map2006 {
+	font-size: 22px;
+	float: right;
+	margin-bottom: 1em;
 }
 
 .mapcontainer .label.top {
@@ -386,12 +393,62 @@ div.suf-widget {
 	text-align: right;
 }
 
+#attribute_select {
+	max-height: 400px;
+	overflow: auto;
+	border: 1px solid #AAA;
+}
+#attribute_select .selectLayer {
+	padding: 5px;
+}
+
+.attribute_select:nth-child(odd) {
+	background: #DDD;
+}
+
+.attribute_select {
+	clear: both;
+}
+.attribute_select .attr_inner {
+	padding: 0 2px 0 18px;
+}
+.attribute_select .attr_inner input {
+	margin: 0 3px 0 -12px;
+}
+.attribute_select .attr_inner label {
+}
+
+/* filter display at the bottom of the map */
+#filterMap {
+	float: right;
+	display: block;	
+	position: relative;
+	width: 720px;
+	margin: 20px auto;
+	clear: both;
+}
+#filtersLabel {
+	padding: 0 .5em 0 0;
+	float: left;
+	font-weight: bold;
+}
+#currentFilter {
+	float: left;
+}
+#showdata {
+	clear: both;
+}
+#currentFilterSelect {
+	width: 50%;
+}
+
 /* legend */
 #legendcontainer {
 	position: relative;
 	width: 720px;
 	margin: 20px auto;
 	display: none;
+	clear: both;
 }
 
 #legendcontainer .legend_text {

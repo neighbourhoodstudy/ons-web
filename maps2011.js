@@ -6,8 +6,10 @@ if (!ons2011) {
 }
 
 ons2011.fusionkey = 'AIzaSyB8WOj6_y_qqbIfFJqx8s6RLjzK8yVF7Bc';
-ons2011.layersId = "1_aBzanFdcsmGmDOo4xOTCXFpRwB1xlr2XnknqCc";
+
+ons2011.layersId = "1HnZbd40clfRXipKK2Yndpf7Y1z3JA_YrvOXJ1OI";
 ons2011.neighbourhoodsId = "1VD9W0XH5VxaVk1eV_WwM1NCQZaLXVXyzeAe7w5U";
+
 /*
  * our default styles for polygons and lines (paths)
  */
@@ -85,7 +87,7 @@ ons2011.fitMap = function(map, id) {
 				if (n.geometry && n.geometry.bounds) {
 					bounds.union(n.geometry.bounds);
 				}
-			} else if (!id || id == "null") {
+			} else if (!id || id == "null" || id == "") {
 				if (n.geometry && n.geometry.bounds) {
 					bounds.union(n.geometry.bounds);
 				}
@@ -234,10 +236,15 @@ ons2011.loadData = function () {
 					
 					retObj[key] = value;
 				}
+				
+				//set up the pageid to be the current locale
+				var lang = dojo.cookie('onslang');
+				if (lang && retObj['pageid_' + lang]) {
+					retObj['pageid'] = retObj['pageid_' + lang];
+				}
 				ons2011.cache["neighbourhoods"].push(retObj);
 			} 
 			
-      		
 			defNeighbourhood.resolve(ons2011.cache["neighbourhoods"]);
       });
     });
@@ -352,21 +359,25 @@ ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 	});
 	
 	google.maps.event.addListener(poly, 'mousedown', function() { 
-		if (neigh["ID"]) {
+		if (neigh["pageid"]) {
 			//go to the neighbourhood page when the user clicks on a neighbourhood.
 			// this is obviously hacky and should change some day.
 			require(["dojo/_base/url","dojo/ready"], function(url, ready){
 				ready(function(){
+					debugger;
+					//figure out if we're in fr or en
 					var query = (new url(window.location)).query;
 					if (query) {
 						var q = dojo.queryToObject(query || {}); 
 						id = q.page_id ? q.page_id: id;
-						if (id != 129) { 
-							window.location = "/?page_id=" + neigh["ID"];
+						
+						//don't go anywhere for the english or french map pages
+						if (id != 2863) { 
+							window.location = "/?page_id=" + neigh["pageid"];
 						}
 					} else {
 						//main page.. go as well
-						window.location = "/?page_id=" + neigh["ID"];
+						window.location = "/?page_id=" + neigh["pageid"];
 					}
 				});
 			});
@@ -399,7 +410,7 @@ ons2011.showMap = function(mapnodeid, id) {
 		
 	//make polys
 	ons2011.getAllNeighbourhoods().then(function(arr) {
-	
+		
 		//var layer = new google.maps.FusionTablesLayer({ query: query });
 		//ons2011._ons2011Layer = layer;
 		
@@ -431,7 +442,7 @@ ons2011.showMap = function(mapnodeid, id) {
 
 
 /**
- * Returns a deferred containing the data for a specific filler
+ * Returns a deferred containing the data for a specific filter
  */
 ons2011.getFilterData = function(data) {
 	var def = new dojo.Deferred();
@@ -448,7 +459,7 @@ ons2011.getFilterData = function(data) {
     request.execute(function(data){
     		
     		if (!data.rows) {
-    			if (console && console.error) { console.error(response, queryText); }
+    			if (console && console.error) { console.error(data); }
     			def.error();
     		}
     		
@@ -624,15 +635,22 @@ ons2011.filterMap = function(filterArray) {
 		});
 	});
 	
+	dojo.style(dojo.byId("filterMap"), {display: "none"});
 	if (filterArray && filterArray != "null" && filterArray.length > 0) {
 		
+		//set up the filter label and current filter
+		dojo.style(dojo.byId("filterMap"), {display: "block"});
+		var filterNode = dojo.byId("currentFilter");
 		dojo.forEach(filterArray, function(filter) {
 			var data = ons2011.cache["categories"][category][layer][filter];
 			ons2011.getFilterData(data).then(function(values) {
+				
 				if (!values) {
+					filterNode.innerHTML = "";
 					return;
 				}
-				
+				filterNode.innerHTML = filter;
+		
 				var max = 0;
 				var pos = 0;
 				var valArray = new Array(values.length);
@@ -643,13 +661,28 @@ ons2011.filterMap = function(filterArray) {
 				}
 				valArray.sort(function(a,b){return a - b});
 				
-				//if choroplet
-				if (data["Choropleth"] == "YES") {
+				//check what the user wants
+				var colorOrCircle = dojo.byId("currentFilterSelect");
 				
+				//what does this data point support?
+				dojo.attr(colorOrCircle.options[0], 'disabled', data["Choropleth"] != "YES");
+				dojo.attr(colorOrCircle.options[1], 'disabled', data["Proportional Circle"] != "YES");
+				
+				//make sure the selected index is valid
+				if (colorOrCircle.selectedIndex == 0 && data["Choropleth"] != "YES") {
+					colorOrCircle.selectedIndex = 1;
+				}
+				if (colorOrCircle.selectedIndex == 1 && data["Proportional Circle"] != "YES") {
+					colorOrCircle.selectedIndex = 0;
+				}
+				
+				//if choropleth
+				if (data["Choropleth"] == "YES") {
+					
 					ons2011.paintChoropleth(data, values, valArray, max);
 					
 				} else if (data["Proportional Circle"] == "YES") {
-				
+					colorOrCircle.selectedIndex = 1;
 					ons2011.paintCircles(data, values, valArray, max);
 				
 				}
@@ -699,7 +732,12 @@ ons2011.showPoints = function() {
 					});
 					ons2011._currentMap.markers.push(marker);
 					
-					setTimeout(processNext, 10);
+					if (data.rows.length < 100) {
+						setTimeout(processNext, 10);
+					} else {
+						processNext();
+					}
+					
 				};
 				
 				processNext();
@@ -716,7 +754,6 @@ ons2011.categorySelected = function(category) {
 	var categorySelect = dojo.byId('category_select');
 	var layerNode = dojo.byId('layer_select');
 	var pointsSelect = dojo.byId('points_select');
-	var attrNode = dojo.byId('attribute_select');
 	
 	ons2011.layerSelected(null);
 	
@@ -777,13 +814,26 @@ ons2011.layerSelected = function(layer) {
 	
 	if (attrNode) {
 		dojo.attr(attrNode, 'disabled', false);
+		
+		var createSelection = function(id, inner, value) {
+			var attr = dojo.create('div', {className:'attribute_select'}, attrNode);
+			var innerdiv = dojo.create('div', {className:'attr_inner'}, attr);
+			var i = dojo.create('input', {id:id, type:'checkbox', value: value}, innerdiv);
+			dojo.create('label', {for:id, innerHTML:inner, value: value}, innerdiv);
+			
+			
+			dojo.connect(i, "onclick", ons2011.attributeSelected);
+		}
 		dojo.empty(attrNode);
-		dojo.create('option', {innerHTML:"", value: null}, attrNode);
+		
 		//create our options
 		if (layer && layer != "null") {
+			var count = 0;
 			for (var layer in ons2011.cache["categories"][catNode.value][layer]) {
-				dojo.create('option', {innerHTML:layer, value: layer}, attrNode);
+				createSelection("attr" + count++, layer,  layer);
 			};
+		} else {
+			dojo.create('div', {className:"selectLayer", innerHTML:"Select a filter layer first"}, attrNode);
 		}
 	}
 	
@@ -804,12 +854,16 @@ ons2011.layerSelected = function(layer) {
  * A layer has been selected from the dropdown
  */
 ons2011.attributeSelected = function(attribute) {
+	if (!dojo.byId('category_select') || !dojo.byId('layer_select')) {
+		return;
+	}
+	
 	var category = dojo.byId('category_select').value;
 	var layer = dojo.byId('layer_select').value;
 	
 	var selected = [];
 	var selType = null;
-	dojo.query("#attribute_select option").forEach(function(node2){
+	dojo.query("#attribute_select input").forEach(function(node2){
 		dojo.attr(node2, 'disabled', false);
 	});
 	
@@ -830,17 +884,19 @@ ons2011.attributeSelected = function(attribute) {
        
     });
     
+    //only allow one selection for now
     if (selected.length == 1) {
 		
 		//find all the other selects options and disable them
-		dojo.query("#attribute_select option").forEach(function(node2){
-			if (node2.value == "null") {
+		dojo.query("#attribute_select input").forEach(function(node2){
+			if (node2.value == "null" || node2.value == "") {
 				return;
 			}
 			
 			var data2 = ons2011.cache["categories"][category][layer][node2.value];
 			var curSelType = data2["Choropleth"] == "YES" ? "Choropleth" : "Proportional Circle";
-			if (selected[0] != node2.value && selType == curSelType) {
+			//if (selected[0] != node2.value && selType == curSelType) {
+			if (selected[0] != node2.value) {
 				dojo.attr(node2, 'disabled', true);
 			}
 		});
@@ -859,6 +915,12 @@ ons2011.clearFilters = function() {
 	ons2011.layerSelected(null);
 	ons2011.filterMap(null);
 }
+
+ons2011.clearPoints = function() {
+	dojo.byId("points_select").selectedIndex = 0;
+	ons2011.showPoints();
+}
+
 
 /* 
  Shows a chart in the provided id, filtered by the 
@@ -1032,6 +1094,29 @@ ons2011.createTabs = function() {
     dojo.place(dojo.byId("chartTab"), cp2.domNode);
 }
 
+
+ons2011.showLoading = function(id) {
+	var opts = {
+	  lines: 7, // The number of lines to draw
+	  length: 12, // The length of each line
+	  width: 7, // The line thickness
+	  radius: 12, // The radius of the inner circle
+	  corners: 1, // Corner roundness (0..1)
+	  rotate: 0, // The rotation offset
+	  color: '#000', // #rgb or #rrggbb
+	  speed: 1.3, // Rounds per second
+	  trail: 46, // Afterglow percentage
+	  shadow: false, // Whether to render a shadow
+	  hwaccel: false, // Whether to use hardware acceleration
+	  className: 'spinner', // The CSS class to assign to the spinner
+	  zIndex: 2e9, // The z-index (defaults to 2000000000)
+	  top: 'auto', // Top position relative to parent in px
+	  left: 'auto' // Left position relative to parent in px
+	};
+	var target = document.getElementById(id);
+	ons2011.spinner = new Spinner(opts).spin(target);
+}
+
 onGoogleLoad = function() {
 	gapi.client.setApiKey('AIzaSyB8WOj6_y_qqbIfFJqx8s6RLjzK8yVF7Bc');
 }
@@ -1040,7 +1125,12 @@ ons2011._ready = false;
 
 require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/DeferredList", "dijit/Dialog", "dijit/layout/TabContainer", "dijit/layout/ContentPane"], function(url, dom, ready, color, deferredlist, Dialog, TextBox, Button){
          ready(function(){
-         	
+         	 
+         	//don't do anything if there is a 'cancelmaps2011' div
+         	if (dojo.byId('cancelmaps2011')) {
+         		return;
+         	}
+         	  	
          	//TODO - show a loading dialog thing
 			$j = $;
 			
@@ -1048,7 +1138,12 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 			//$j.collapsible('.collapsible .header')
 
 			ons2011.createTabs();
-				
+			
+			//show a loading spinner
+			if (dojo.byId('map_canvas')) {
+				ons2011.showLoading	('map_canvas');
+			}
+							
 			//first thing we do is load all our neighbourhoods so we can cache them
 			var d = ons2011.getAllNeighbourhoods().then(function(neighbourhoods) {
 				
@@ -1084,6 +1179,10 @@ require(["dojo/_base/url", "dojo/dom", "dojo/ready", "dojox/color", "dojo/Deferr
 				var neighbourhoodsDiv = dojo.byId("chart_neighbourhoods");
 				if (neighbourhoodsDiv) {
 					ons2011.populateNeighbourhoodSelect(neighbourhoodsDiv);
+				}
+				
+				if (ons2011.spinner) {
+					//ons2011.spinner.stop();
 				}
 				
 			});
