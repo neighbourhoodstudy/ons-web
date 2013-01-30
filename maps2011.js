@@ -186,7 +186,7 @@ ons2011.loadData = function () {
 	  var retData = {};
 
 	  //Load our layer/categories table
-	  var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select Category,Layer,'Polygon Attributes','Attribute Description','Data Table ID','Points of Interest Table ID','Polygon Layer','Point Layer','Choropleth','Proportional Circle' from " + ons2011.layersId});
+	  var request = gapi.client.fusiontables.query.sqlGet({'sql': "Select Category,Layer,'Polygon Attributes','Attribute Description','Data Table ID','Points of Interest Table ID','Polygon Layer','Point Layer','Choropleth','Proportional Circle','Layer Definition' from " + ons2011.layersId});
       request.execute(function(data){
       
       	ons2011.cache["layers"] = data;
@@ -343,7 +343,7 @@ ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 			
 			ons2011.timeout3 = setTimeout(function() {
 				dojo.style(n, { display: "none" });
-			},2000);
+			},10000);
 		},200);
 	});
 	
@@ -364,7 +364,6 @@ ons2011.makePoly = function(arrCoords, ons2011map, neigh) {
 			// this is obviously hacky and should change some day.
 			require(["dojo/_base/url","dojo/ready"], function(url, ready){
 				ready(function(){
-					debugger;
 					//figure out if we're in fr or en
 					var query = (new url(window.location)).query;
 					if (query) {
@@ -555,6 +554,21 @@ ons2011.paintCircles = function(data, neighbourhoods, valArray) {
 	var legend = dojo.byId("map_legend");
 	var legend_container = dojo.byId("legendcontainer");
 	
+	//find the minimum point value
+	var ValMin = -1;
+	for(var name in neighbourhoods) {
+		ons2011.findNeighbourhood(null, name).then(function(neigh) {
+			var value = neighbourhoods[name];
+			if (ValMin == -1 || value < ValMin) {
+				ValMin = value;
+			}
+		});
+	}
+	
+	if (ValMin == 0) {
+		ValMin = 1;
+	}
+	
 	for(var name in neighbourhoods) {
 		ons2011.findNeighbourhood(null, name).then(function(neigh) {
 			if (!neigh) {
@@ -580,22 +594,41 @@ ons2011.paintCircles = function(data, neighbourhoods, valArray) {
 			
 			dojo.forEach(neigh.polygons, function(poly) {
 				google.maps.event.addListener(neigh.circle , 'mouseover', function() {  
-					google.maps.event.trigger(poly, 'mouseover', arguments[0]);
+				//	google.maps.event.trigger(poly, 'mouseover', arguments[0]);
 				});
 				
 				google.maps.event.addListener(neigh.circle, 'mouseout', function() { 
-					google.maps.event.trigger(poly, 'mouseout', arguments[0]);
+				//	google.maps.event.trigger(poly, 'mouseout', arguments[0]);
 				});
 				
 				poly._filter.push({name: neigh['name'], filter: filterLabel, value: value});
 			});
 			
+			
+			/*
+				Flannery Appearance Compensation case best to use
+				Pj = 1.0083 * (Valj/ValMin)^0.5716 * Pmin 
+				
+				Where: 
+				Pj = point size of the j'th feature 
+				Valj = value of the j'th feature 
+				ValMin = minimum value 
+				Pmin = minimum point size 
+				^0.5 is to the power of 0.5 (square root) 
+				^0.5716 is to the power of 0.5716 
+			*/
+			var Valj = value;
+			var Pmin = map.getZoom()*50;
+			
+			var Pj = 1.0083 * (Valj/ValMin)^0.5716 * Pmin;
+			//console.log(Pmin, Pj, Valj, ValMin);
+			
 			neigh.circle.setOptions({
 				center : bounds.getCenter(),
-				radius : (20000*value)/(map.getZoom()*10),
-				map : map
+				radius : Pj,//(20000*value)/(map.getZoom()*10),
+				map : map,
+				zIndex: 1000
 			});
-			
 			
 			
 	
@@ -769,7 +802,7 @@ ons2011.categorySelected = function(category) {
 	
 	if (category && category != "null") {
 		dojo.query("label", layerNode.parentNode).forEach(function(node){
-			dojo.removeClass(node, 'disabled');
+			dojo.removeClass(node, 'disabled');	
 		});
 		dojo.query("label", pointsSelect.parentNode).forEach(function(node){
 			dojo.removeClass(node, 'disabled');
@@ -820,9 +853,8 @@ ons2011.layerSelected = function(layer) {
 			var innerdiv = dojo.create('div', {className:'attr_inner'}, attr);
 			var i = dojo.create('input', {id:id, type:'checkbox', value: value}, innerdiv);
 			dojo.create('label', {for:id, innerHTML:inner, value: value}, innerdiv);
-			
-			
-			dojo.connect(i, "onclick", ons2011.attributeSelected);
+			 
+			dojo.connect(i, "onclick", function() { ons2011.attributeSelected(); ons2011.showChart('chart_div'); });
 		}
 		dojo.empty(attrNode);
 		
@@ -886,6 +918,8 @@ ons2011.attributeSelected = function(attribute) {
     
     //only allow one selection for now
     if (selected.length == 1) {
+        var filter = selected[0];
+		var data = ons2011.cache["categories"][category][layer][filter];
 		
 		//find all the other selects options and disable them
 		dojo.query("#attribute_select input").forEach(function(node2){
@@ -901,6 +935,14 @@ ons2011.attributeSelected = function(attribute) {
 			}
 		});
 		
+		//update the definition (if defined)
+		if (data['Layer Definition'] && dojo.byId('layer_definition')) {
+			dojo.style(dojo.byId('layer_definition'), {display: ""});
+			dojo.query("#layer_definition #value")[0].innerHTML = data['Layer Definition'];
+		} else {
+			dojo.style(dojo.byId('layer_definition'), {display: "none"});
+		}
+		//alert(data['Layer Definition']);
 	}	
         
 	ons2011.filterMap(selected);
@@ -939,7 +981,7 @@ ons2011.showChart = function(id) {
 	dojo.query("#attribute_select :checked").forEach(function(node){
 		selected.push(node.value);
 	});
-	
+		
 	if (!chartDiv) {
 		return;
 	}

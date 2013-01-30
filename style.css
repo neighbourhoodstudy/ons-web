@@ -418,6 +418,21 @@ div.suf-widget {
 .attribute_select .attr_inner label {
 }
 
+#layer_definition span {
+	font-weight: bold;
+}
+
+#layer_definition {
+	width: 50%;
+	position: relative;
+	top: 70px;
+	padding: 5px;
+}
+
+#layer_definition #value {
+
+}
+
 /* filter display at the bottom of the map */
 #filterMap {
 	float: right;
