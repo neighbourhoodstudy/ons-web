@@ -943,7 +943,9 @@ ons2011.attributeSelected = function(attribute) {
 			dojo.style(dojo.byId('layer_definition'), {display: "none"});
 		}
 		//alert(data['Layer Definition']);
-	}	
+	} else {
+		dojo.style(dojo.byId('layer_definition'), {display: "none"});
+	}
         
 	ons2011.filterMap(selected);
 }
